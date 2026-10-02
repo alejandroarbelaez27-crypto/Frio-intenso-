@@ -808,8 +808,9 @@ function renderHoy(){
     pill.firstChild.textContent = 'Caja abierta';
     $('#hoyTotal').textContent = fmt(pend.reduce((a, v) => a + v.total, 0));
   } else {
-    pill.firstChild.textContent = cerradaHoy ? 'Caja cerrada ✓' : 'Hoy';
-    $('#hoyTotal').textContent = fmt(S.ventas.filter(v => keyDia(new Date(v.fecha)) === hoy).reduce((a, v) => a + v.total, 0));
+    // Después de cerrar la caja, el contador vuelve a $0 hasta la siguiente venta
+    pill.firstChild.textContent = cerradaHoy ? 'Caja cerrada ✓' : 'Caja abierta';
+    $('#hoyTotal').textContent = fmt(0);
   }
 }
 
