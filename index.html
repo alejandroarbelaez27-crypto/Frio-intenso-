@@ -96,6 +96,21 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   .seg.big button{padding:11px 6px;font-size:15px;border-radius:11px}
   .seg.big button.on{background:var(--c,var(--primary));color:var(--on-c);box-shadow:none}
 
+  /* ===== Selector de categorías ===== */
+  .lchips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;margin-bottom:6px;scrollbar-width:none}
+  .lchips::-webkit-scrollbar{display:none}
+  .lchip{flex:none;border:2px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 15px;border-radius:14px;font-weight:800;font-size:15px;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .lchip i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+  .lchip.on{background:var(--c);border-color:var(--c);color:var(--tc)}
+  .lchip.on i{background:var(--tc)}
+  .lchip.off{opacity:.55}
+  .lchip.add{border-style:dashed;color:var(--muted)}
+  .pres-row{display:grid;grid-template-columns:1fr 120px 40px;gap:8px;margin-bottom:8px;align-items:center}
+  .tam-btn .o.txt{font-size:20px;line-height:1.15;word-break:break-word}
+  .opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-weight:700;font-size:14px}
+  .opt input{margin-top:3px;width:18px;height:18px;flex:none}
+  .opt small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+
   /* ===== Chips ===== */
   .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;margin-bottom:10px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
@@ -287,7 +302,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   <div id="netBanner"></div>
   <!-- ===================== CAJA ===================== -->
   <section class="view active" id="v-caja">
-    <div class="seg big" id="lineaCaja"></div>
+    <div class="lchips" id="lineaCaja"></div>
     <div class="grid" id="prodGrid"></div>
   </section>
 
@@ -319,7 +334,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 
   <!-- ===================== PRODUCTOS ===================== -->
   <section class="view" id="v-prods">
-    <div class="seg big" id="lineaProd"></div>
+    <div class="lchips" id="lineaProd"></div>
     <div id="prodsBody"></div>
     <div class="section-t">Datos</div>
     <div class="card" id="datosCard"></div>
@@ -402,13 +417,16 @@ const Almacen = {
   }
 };
 const leerLocal = () => ({
+  lineas: Almacen.get('fi_lineas', null),
   productos: Almacen.get('fi_productos', null), tamanos: Almacen.get('fi_tamanos', null),
   ventas: Almacen.get('fi_ventas', []), cierres: Almacen.get('fi_cierres', [])
 });
 
 const DBLocal = {
   async cargar(){ return leerLocal(); },
-  async _guardar(){ Almacen.set('fi_productos', S.productos); Almacen.set('fi_tamanos', S.tamanos); Almacen.set('fi_ventas', S.ventas); Almacen.set('fi_cierres', S.cierres); },
+  async _guardar(){ Almacen.set('fi_lineas', S.lineas); Almacen.set('fi_productos', S.productos); Almacen.set('fi_tamanos', S.tamanos); Almacen.set('fi_ventas', S.ventas); Almacen.set('fi_cierres', S.cierres); },
+  upsertLinea(){ return this._guardar(); },
+  deleteLinea(){ return this._guardar(); },
   upsertProducto(){ return this._guardar(); },
   deleteProducto(){ return this._guardar(); },
   upsertTamano(){ return this._guardar(); },
@@ -427,14 +445,15 @@ const Fila = {
   venta: v => ({ id: v.id, fecha: v.fecha, metodo: v.metodo, items: v.items, total: v.total, cierre_id: v.cierreId || null }),
   deVenta: r => { const v = { id: r.id, fecha: iso(r.fecha), metodo: r.metodo, items: r.items || [], total: r.total }; if (r.cierre_id) v.cierreId = r.cierre_id; return v; },
   tamano: (linea, t) => ({ id: t.id, linea, oz: t.oz, nombre: t.nombre || '', precio: t.precio }),
-  producto: p => ({ id: p.id, nombre: p.nombre, linea: p.linea, color: p.color, activo: p.activo }),
+  producto: p => ({ id: p.id, nombre: p.nombre, linea: p.linea, color: p.color, activo: p.activo, presentaciones: p.presentaciones || null }),
+  linea: l => ({ id: l.id, nombre: l.nombre, uno: l.uno || l.nombre, tipo: l.tipo, color: l.color, orden: l.orden || 0, activo: l.activo !== false }),
   cierre: c => ({ id: c.id, dia: c.dia, cerrado_en: c.cerradoEn, primera: c.primera, ultima: c.ultima, pedidos: c.pedidos, unidades: c.unidades,
     total: c.total, por_metodo: c.porMetodo, por_linea: c.porLinea, unidades_linea: c.unidadesLinea, base: c.base,
     efectivo_ventas: c.efectivoVentas, efectivo_esperado: c.efectivoEsperado, efectivo_contado: c.efectivoContado,
     diferencia: c.diferencia, responsable: c.responsable, nota: c.nota }),
   deCierre: r => ({ id: r.id, dia: String(r.dia).slice(0, 10), cerradoEn: iso(r.cerrado_en), primera: iso(r.primera), ultima: iso(r.ultima),
-    pedidos: r.pedidos, unidades: r.unidades, total: r.total, porMetodo: r.por_metodo || {}, porLinea: r.por_linea || { granizado: 0, frappe: 0 },
-    unidadesLinea: r.unidades_linea || { granizado: 0, frappe: 0 }, base: r.base || 0, efectivoVentas: r.efectivo_ventas || 0,
+    pedidos: r.pedidos, unidades: r.unidades, total: r.total, porMetodo: r.por_metodo || {}, porLinea: r.por_linea || {},
+    unidadesLinea: r.unidades_linea || {}, base: r.base || 0, efectivoVentas: r.efectivo_ventas || 0,
     efectivoEsperado: r.efectivo_esperado || 0, efectivoContado: r.efectivo_contado, diferencia: r.diferencia, responsable: r.responsable || '', nota: r.nota || '' })
 };
 async function q(consulta){ const { error } = await consulta; if (error) throw error; }
@@ -449,19 +468,27 @@ async function leerTabla(tabla, orden){   // Supabase entrega máximo 1000 filas
     desde += 1000;
   }
 }
+const filasTamanos = tams => Object.entries(tams || {}).flatMap(([l, lista]) => (lista || []).map(t => Fila.tamano(l, t)));
 async function insertarEnTrozos(tabla, filas){ for (const t of trozos(filas, 500)) await q(sb.from(tabla).upsert(t)); }
 
 const DBNube = {
   async cargar(){
     const [p, t, v, c] = await Promise.all([leerTabla('productos', 'id'), leerTabla('tamanos', 'id'), leerTabla('ventas', 'fecha'), leerTabla('cierres', 'cerrado_en')]);
-    const tamanos = { granizado: [], frappe: [] };
+    // La tabla de categorías llegó en la actualización 2; si no existe, la app avisa
+    let lineas = null;
+    try { lineas = await leerTabla('lineas', 'orden'); S.faltaActualizar = false; }
+    catch(e){ console.warn('Tabla lineas:', e); S.faltaActualizar = true; }
+    const tamanos = {};
     t.forEach(r => (tamanos[r.linea] = tamanos[r.linea] || []).push({ id: r.id, oz: Number(r.oz), nombre: r.nombre || '', precio: r.precio }));
     return {
-      productos: p.length ? p.map(r => ({ id: r.id, nombre: r.nombre, linea: r.linea, color: r.color, activo: r.activo !== false })) : null,
+      lineas: lineas && lineas.length ? lineas.map(r => ({ id: r.id, nombre: r.nombre, uno: r.uno || r.nombre, tipo: r.tipo, color: r.color, orden: r.orden || 0, activo: r.activo !== false })) : null,
+      productos: p.length ? p.map(r => ({ id: r.id, nombre: r.nombre, linea: r.linea, color: r.color, activo: r.activo !== false, presentaciones: r.presentaciones || null })) : null,
       tamanos: t.length ? tamanos : null,
       ventas: v.map(Fila.deVenta), cierres: c.map(Fila.deCierre)
     };
   },
+  upsertLinea: l => q(sb.from('lineas').upsert(Fila.linea(l))),
+  deleteLinea: id => q(sb.from('lineas').delete().eq('id', id)),
   upsertProducto: p => q(sb.from('productos').upsert(Fila.producto(p))),
   deleteProducto: id => q(sb.from('productos').delete().eq('id', id)),
   upsertTamano: (linea, t) => q(sb.from('tamanos').upsert(Fila.tamano(linea, t))),
@@ -485,14 +512,16 @@ const DBNube = {
   async reemplazarTodo(){
     await q(sb.from('productos').delete().neq('id', ''));
     await q(sb.from('tamanos').delete().neq('id', ''));
+    if (!S.faltaActualizar){ await q(sb.from('lineas').delete().neq('id', '')); await insertarEnTrozos('lineas', S.lineas.map(Fila.linea)); }
     await insertarEnTrozos('productos', S.productos.map(Fila.producto));
-    await insertarEnTrozos('tamanos', LINEA_IDS.flatMap(l => (S.tamanos[l] || []).map(t => Fila.tamano(l, t))));
+    await insertarEnTrozos('tamanos', filasTamanos(S.tamanos));
     await this.reemplazarVentasYCierres();
   },
   // Sube lo que haya en este celular sin borrar nada de la nube
   async subirLocal(d){
     if (d.productos) await insertarEnTrozos('productos', migrarProductos(d.productos).map(Fila.producto));
-    if (d.tamanos) await insertarEnTrozos('tamanos', LINEA_IDS.flatMap(l => (d.tamanos[l] || []).map(t => Fila.tamano(l, t))));
+    if (d.lineas && !S.faltaActualizar) await insertarEnTrozos('lineas', d.lineas.map(Fila.linea));
+    if (d.tamanos) await insertarEnTrozos('tamanos', filasTamanos(d.tamanos));
     await insertarEnTrozos('cierres', (d.cierres || []).map(Fila.cierre));
     await insertarEnTrozos('ventas', migrarVentas(d.ventas || []).map(Fila.venta));
   }
@@ -544,19 +573,36 @@ async function vaciarCola(){
 function pintarEstadoNube(){
   const n = NUBE ? Cola.leer().length : 0;
   const el = document.getElementById('netBanner'); if (!el) return;
-  el.innerHTML = n ? `<div class="warn">⚠ ${n} ${n === 1 ? 'venta' : 'ventas'} sin subir a la nube. Se suben solas cuando vuelva el internet.
-    <br><button class="btn sm ghost" id="btnReintentar">Reintentar ahora</button></div>` : '';
+  el.innerHTML = (n ? `<div class="warn">⚠ ${n} ${n === 1 ? 'venta' : 'ventas'} sin subir a la nube. Se suben solas cuando vuelva el internet.
+    <br><button class="btn sm ghost" id="btnReintentar">Reintentar ahora</button></div>` : '')
+    + (NUBE && S.faltaActualizar ? `<div class="warn">⚠ Falta actualizar la base de datos para usar Cervezas, Licores, Agua y categorías nuevas.
+    Corre el archivo <b>supabase-actualizacion-2.sql</b> en el SQL Editor de Supabase y recarga la app.</div>` : '');
 }
 document.addEventListener('click', e => { if (e.target.id === 'btnReintentar') vaciarCola(); });
 window.addEventListener('online', vaciarCola);
 setInterval(vaciarCola, 30000);
 
 /* ================= CONFIGURACIÓN ================= */
-const LINEAS = {
-  granizado: { nombre: 'Granizados', uno: 'Granizado', cssColor: 'var(--gran)' },
-  frappe:    { nombre: 'Frappés',    uno: 'Frappé',    cssColor: 'var(--frap)' }
-};
-const LINEA_IDS = ['granizado', 'frappe'];
+// Categorías (antes "líneas"). Dos tipos:
+//  - 'tamanos': el precio depende del tamaño del vaso, igual para todos los sabores (granizados, frappés)
+//  - 'producto': cada producto tiene sus propias presentaciones y precios (cervezas, licores, agua)
+const LINEAS_INICIALES = [
+  { id: 'granizado', nombre: 'Granizados', uno: 'Granizado', tipo: 'tamanos',  color: '#0b80c2', orden: 1, activo: true },
+  { id: 'frappe',    nombre: 'Frappés',    uno: 'Frappé',    tipo: 'tamanos',  color: '#c4620a', orden: 2, activo: true },
+  { id: 'cerveza',   nombre: 'Cervezas',   uno: 'Cerveza',   tipo: 'producto', color: '#c99a06', orden: 3, activo: true },
+  { id: 'licor',     nombre: 'Licores',    uno: 'Licor',     tipo: 'producto', color: '#7b3fb8', orden: 4, activo: true },
+  { id: 'agua',      nombre: 'Agua',       uno: 'Agua',      tipo: 'producto', color: '#16a39b', orden: 5, activo: true }
+];
+const COLORES_LINEA = ['#0b80c2','#c4620a','#c99a06','#7b3fb8','#16a39b','#d6336c','#2f9e44','#5c6bc0','#8d5a3b','#495057'];
+let LINEAS = {};
+const indexarLineas = () => { LINEAS = Object.fromEntries(S.lineas.map(l => [l.id, l])); };
+const lineasOrden = () => [...S.lineas].sort((a, b) => (a.orden || 0) - (b.orden || 0));
+const lineaIds = () => lineasOrden().map(l => l.id);
+const lineasActivas = () => lineasOrden().filter(l => l.activo !== false);
+const nombreLinea = l => LINEAS[l]?.nombre || (l === 'granizado' ? 'Granizados' : l === 'frappe' ? 'Frappés' : l || 'Otros');
+const unoDe = l => LINEAS[l]?.uno || nombreLinea(l);
+const esPorTamano = l => (LINEAS[l]?.tipo || 'tamanos') === 'tamanos';
+
 const METODOS = ['Efectivo', 'Nequi', 'Daviplata', 'Transferencia'];
 const COLORES = ['#f5a623','#e8443a','#ffcf33','#7b4fd6','#3aa655','#f06292','#8d5a3b','#5b5b66','#ff7a45','#2fd0dc','#0b80c2','#b0d236'];
 
@@ -566,6 +612,17 @@ const PRODUCTOS_INICIALES = [
   ['Mora','granizado','#7b4fd6'], ['Limón','granizado','#3aa655'], ['Cereza','granizado','#f06292'],
   ['Café','frappe','#8d5a3b'], ['Oreo','frappe','#5b5b66'], ['Arequipe','frappe','#ff7a45']
 ].map(([nombre, linea, color], i) => ({ id: 'p' + (i + 1), nombre, linea, color, activo: true }));
+const pres = (id, lista) => lista.map(([nombre, precio], i) => ({ id: id + '-' + (i + 1), nombre, precio }));
+const PRODUCTOS_EXTRA = [
+  { id: 'pc1', nombre: 'Águila',            linea: 'cerveza', color: '#ffcf33', presentaciones: pres('pc1', [['Unidad', 4000]]) },
+  { id: 'pc2', nombre: 'Poker',             linea: 'cerveza', color: '#e8443a', presentaciones: pres('pc2', [['Unidad', 4000]]) },
+  { id: 'pc3', nombre: 'Club Colombia',     linea: 'cerveza', color: '#f5a623', presentaciones: pres('pc3', [['Unidad', 5000]]) },
+  { id: 'pc4', nombre: 'Corona',            linea: 'cerveza', color: '#2fd0dc', presentaciones: pres('pc4', [['Unidad', 7000]]) },
+  { id: 'pl1', nombre: 'Aguardiente',       linea: 'licor',   color: '#3aa655', presentaciones: pres('pl1', [['Trago', 5000], ['Media', 40000], ['Botella', 75000]]) },
+  { id: 'pl2', nombre: 'Ron',               linea: 'licor',   color: '#8d5a3b', presentaciones: pres('pl2', [['Trago', 6000], ['Media', 45000], ['Botella', 85000]]) },
+  { id: 'pa1', nombre: 'Agua en botella',   linea: 'agua',    color: '#0b80c2', presentaciones: pres('pa1', [['Unidad', 2000]]) },
+  { id: 'pa2', nombre: 'Agua con gas',      linea: 'agua',    color: '#2fd0dc', presentaciones: pres('pa2', [['Unidad', 3000]]) }
+].map(p => ({ ...p, activo: true }));
 const TAMANOS_INICIALES = {
   granizado: [ { id:'tg1', oz:12, nombre:'', precio:6000 }, { id:'tg2', oz:16, nombre:'', precio:8000 }, { id:'tg3', oz:22, nombre:'', precio:10000 } ],
   frappe:    [ { id:'tf1', oz:12, nombre:'', precio:9000 }, { id:'tf2', oz:16, nombre:'', precio:11000 }, { id:'tf3', oz:22, nombre:'', precio:13000 } ]
@@ -573,11 +630,11 @@ const TAMANOS_INICIALES = {
 
 /* ================= ESTADO ================= */
 const S = {
-  productos: [], tamanos: { granizado: [], frappe: [] }, ventas: [], cierres: [],
-  rangoCierre: '30',
-  pedido: {},                 // { "productoId|tamanoId": cantidad }
-  linea: 'granizado',         // línea elegida en la Caja
-  lineaProd: 'granizado',     // línea elegida en Productos
+  lineas: [], productos: [], tamanos: {}, ventas: [], cierres: [],
+  rangoCierre: '30', faltaActualizar: false,
+  pedido: {},                 // { "productoId|varianteId": cantidad }
+  linea: 'granizado',         // categoría elegida en la Caja
+  lineaProd: 'granizado',     // categoría elegida en Productos
   lineaStats: 'todos',        // filtro en Estadísticas
   rango: '7', metodo: 'Efectivo', rankBy: 'u', editColor: COLORES[0]
 };
@@ -594,8 +651,18 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const keyDia = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const colorLinea = l => css(l === 'frappe' ? '--frap' : '--gran');
+const colorLinea = l => LINEAS[l]?.color || css('--primary');
 const tamanosDe = l => [...(S.tamanos[l] || [])].sort((a, b) => a.oz - b.oz);
+// Texto legible (blanco u oscuro) sobre un color de fondo
+const textoSobre = hex => { const n = parseInt(String(hex).slice(1), 16); const [r, g, b] = [n >> 16 & 255, n >> 8 & 255, n & 255];
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#0b2b3c' : '#ffffff'; };
+// Opciones de venta de un producto: tamaños de vaso de su categoría, o sus presentaciones propias
+function variantesDe(p){
+  if (!p) return [];
+  if (esPorTamano(p.linea)) return tamanosDe(p.linea).map(t => ({ id: t.id, etiqueta: t.oz + ' oz', grande: String(t.oz), unidad: 'oz', sub: t.nombre || '', oz: t.oz, precio: t.precio }));
+  return (p.presentaciones || []).map(x => ({ id: x.id, etiqueta: x.nombre, grande: x.nombre, unidad: '', sub: '', oz: null, precio: x.precio }));
+}
+const varTxt = it => it.variante || (it.oz != null ? it.oz + ' oz' : '');
 const tamLabel = t => t.oz + ' oz' + (t.nombre ? ' · ' + t.nombre : '');
 const ICON_TRASH = '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
 const ICON_LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
@@ -622,12 +689,14 @@ function confirmar(msg, okTxt = 'Eliminar', peligro = true){
   });
 }
 
-// Selector de línea reutilizable
-function segLineas(id, actual, conTodos){
-  const ops = (conTodos ? [['todos', 'Todos', 'var(--primary)']] : []).concat(LINEA_IDS.map(l => [l, LINEAS[l].nombre, LINEAS[l].cssColor]));
-  const el = $(id);
-  el.classList.toggle('three', !!conTodos);
-  el.innerHTML = ops.map(([k, t, c]) => `<button data-l="${k}" class="${k === actual ? 'on' : ''}" style="--c:${c}">${t}</button>`).join('');
+// Selector de categoría reutilizable (fila de botones que se desliza)
+function segLineas(id, actual, opts = {}){
+  const lista = opts.todas ? lineasOrden() : lineasActivas();
+  let html = opts.conTodos ? `<button class="lchip ${actual === 'todos' ? 'on' : ''}" data-l="todos" style="--c:var(--primary);--tc:var(--primary-ink)"><i></i>Todos</button>` : '';
+  html += lista.map(l => `<button class="lchip ${l.id === actual ? 'on' : ''} ${l.activo === false ? 'off' : ''}" data-l="${l.id}" style="--c:${l.color};--tc:${textoSobre(l.color)}"><i></i>${esc(l.nombre)}</button>`).join('');
+  if (opts.conNueva) html += `<button class="lchip add" data-l="__nueva">+ Categoría</button>`;
+  const el = $(id); el.innerHTML = html;
+  const on = el.querySelector('.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 /* ================= NAVEGACIÓN ================= */
@@ -669,67 +738,69 @@ function renderHoy(){
    CAJA
    =================================================================== */
 function renderCaja(){
-  segLineas('#lineaCaja', S.linea, false);
-  const tams = tamanosDe(S.linea);
+  if (!LINEAS[S.linea] || LINEAS[S.linea].activo === false) S.linea = lineasActivas()[0]?.id || '';
+  segLineas('#lineaCaja', S.linea);
+  const L = LINEAS[S.linea];
   const lista = S.productos.filter(p => p.activo && p.linea === S.linea);
-  const precioTxt = !tams.length ? 'Sin tamaños'
-    : tams.length === 1 ? fmt(tams[0].precio) + ' · ' + tams[0].oz + ' oz'
-    : 'Desde ' + fmt(Math.min(...tams.map(t => t.precio)));
   $('#prodGrid').innerHTML = lista.length ? lista.map(p => {
+    const vs = variantesDe(p);
+    const precioTxt = !vs.length ? (esPorTamano(p.linea) ? 'Sin tamaños' : 'Sin precio')
+      : vs.length === 1 ? fmt(vs[0].precio) + (esPorTamano(p.linea) ? ' · ' + vs[0].etiqueta : '')
+      : 'Desde ' + fmt(Math.min(...vs.map(v => v.precio)));
     const q = Object.entries(S.pedido).filter(([k]) => k.startsWith(p.id + '|')).reduce((a, [, n]) => a + n, 0);
     return `<button class="prod" style="--c:${p.color}" data-add="${p.id}">
       ${q ? `<span class="q">${q}</span>` : ''}
-      <div class="cat">${LINEAS[p.linea].uno}</div>
+      <div class="cat">${esc(unoDe(p.linea))}</div>
       <div class="n">${esc(p.nombre)}</div>
       <div class="p">${precioTxt}</div>
     </button>`;
-  }).join('') : `<div class="empty" style="grid-column:1/-1">No hay sabores de ${LINEAS[S.linea].nombre.toLowerCase()}. Agrégalos en la pestaña Productos.</div>`;
+  }).join('') : `<div class="empty" style="grid-column:1/-1">${L ? 'No hay productos en ' + esc(L.nombre) + '.' : 'No hay categorías visibles.'} Agrégalos en la pestaña Productos.</div>`;
 }
 $('#lineaCaja').addEventListener('click', e => {
   const b = e.target.closest('[data-l]'); if (!b) return;
   S.linea = b.dataset.l; renderCaja();
 });
 $('#prodGrid').addEventListener('click', e => {
-  const b = e.target.closest('[data-add]'); if (b) elegirTamano(b.dataset.add);
+  const b = e.target.closest('[data-add]'); if (b) elegirVariante(b.dataset.add);
 });
 
-function agregar(pid, tid){
-  const k = pid + '|' + tid;
+function agregar(pid, vid){
+  const k = pid + '|' + vid;
   S.pedido[k] = (S.pedido[k] || 0) + 1;
   if (navigator.vibrate) navigator.vibrate(15);
   renderCaja(); renderOrderbar();
 }
-function elegirTamano(pid){
+function elegirVariante(pid){
   const p = S.productos.find(x => x.id === pid); if (!p) return;
-  const tams = tamanosDe(p.linea);
-  if (!tams.length) return toast('Agrega tamaños de ' + LINEAS[p.linea].nombre.toLowerCase() + ' en Productos');
-  if (tams.length === 1){ agregar(pid, tams[0].id); return; }
+  const vs = variantesDe(p), porTam = esPorTamano(p.linea);
+  if (!vs.length) return toast(porTam ? 'Agrega tamaños de ' + nombreLinea(p.linea).toLowerCase() + ' en Productos' : 'Ponle precio a ' + p.nombre + ' en Productos');
+  if (vs.length === 1){ agregar(pid, vs[0].id); toast('+1 ' + p.nombre); return; }
   openSheet(`
     <h3>${esc(p.nombre)}</h3>
-    <p class="sub">${LINEAS[p.linea].uno} · elige el tamaño</p>
-    <div class="tam-grid">${tams.map(t => {
-      const q = S.pedido[pid + '|' + t.id] || 0;
-      return `<button class="tam-btn" data-t="${t.id}">
+    <p class="sub">${esc(unoDe(p.linea))} · elige ${porTam ? 'el tamaño' : 'la presentación'}</p>
+    <div class="tam-grid">${vs.map(v => {
+      const q = S.pedido[pid + '|' + v.id] || 0;
+      return `<button class="tam-btn" data-t="${v.id}">
         ${q ? `<span class="q">${q}</span>` : ''}
-        <div class="o">${t.oz}<small>oz</small></div>
-        <div class="nm">${esc(t.nombre)}</div>
-        <div class="pr">${fmt(t.precio)}</div>
+        <div class="o ${porTam ? '' : 'txt'}">${esc(v.grande)}${v.unidad ? `<small>${v.unidad}</small>` : ''}</div>
+        <div class="nm">${esc(v.sub)}</div>
+        <div class="pr">${fmt(v.precio)}</div>
       </button>`; }).join('')}
     </div>`);
   $('#sheet').onclick = e => {
     const b = e.target.closest('[data-t]'); if (!b) return;
-    const t = tams.find(x => x.id === b.dataset.t);
+    const v = vs.find(x => x.id === b.dataset.t);
     agregar(pid, b.dataset.t); closeSheet();
-    toast('+1 ' + p.nombre + ' ' + t.oz + ' oz');
+    toast('+1 ' + p.nombre + ' ' + v.etiqueta);
   };
 }
 
 function pedidoItems(){
   return Object.entries(S.pedido).filter(([, q]) => q > 0).map(([k, q]) => {
-    const [pid, tid] = k.split('|');
+    const [pid, vid] = k.split('|');
     const p = S.productos.find(x => x.id === pid);
-    const t = p && (S.tamanos[p.linea] || []).find(x => x.id === tid);
-    return p && t ? { key: k, productoId: pid, nombre: p.nombre, linea: p.linea, tamanoId: tid, oz: t.oz, precio: t.precio, cantidad: q } : null;
+    const v = variantesDe(p).find(x => x.id === vid);
+    return p && v ? { key: k, productoId: pid, nombre: p.nombre, linea: p.linea, tamanoId: vid, oz: v.oz, variante: v.etiqueta, precio: v.precio, cantidad: q } : null;
   }).filter(Boolean);
 }
 function renderOrderbar(){
@@ -752,7 +823,7 @@ function abrirCobro(){
     <h3>Confirmar venta</h3>
     ${items.map(it => `
       <div class="line">
-        <div class="nm">${esc(it.nombre)} · ${it.oz} oz<small>${LINEAS[it.linea].uno} · ${fmt(it.precio)}</small></div>
+        <div class="nm">${esc(it.nombre)} · ${esc(it.variante)}<small>${esc(unoDe(it.linea))} · ${fmt(it.precio)}</small></div>
         <div class="qty">
           <button class="icon-btn" data-q="${it.key}" data-d="-1" aria-label="Menos">−</button>
           <b>${it.cantidad}</b>
@@ -809,12 +880,14 @@ function calcular(){
   const filtro = S.lineaStats;
   const incluye = l => filtro === 'todos' || l === filtro;
   const vRango = S.ventas.filter(v => !ini || new Date(v.fecha) >= ini);
-  const porLinea = { granizado: { u: 0, i: 0 }, frappe: { u: 0, i: 0 } };
-  const prods = { granizado: new Map(), frappe: new Map() };
-  const tams = { granizado: new Map(), frappe: new Map() };
-  // Todos los sabores y tamaños activos aparecen, aunque tengan 0 ventas
-  S.productos.filter(p => p.activo).forEach(p => prods[p.linea].set(p.id, { nombre: p.nombre, u: 0, i: 0 }));
-  LINEA_IDS.forEach(l => tamanosDe(l).forEach(t => tams[l].set(String(t.oz), { label: t.oz + ' oz', nombre: t.nombre, oz: t.oz, u: 0, i: 0 })));
+  const porLinea = {}, prods = {}, vars = {};
+  const asegurar = l => { if (!porLinea[l]){ porLinea[l] = { u: 0, i: 0 }; prods[l] = new Map(); vars[l] = new Map(); } };
+  // Todos los productos y tamaños activos aparecen, aunque tengan 0 ventas
+  S.productos.filter(p => p.activo && incluye(p.linea)).forEach(p => {
+    asegurar(p.linea);
+    prods[p.linea].set(p.id, { nombre: p.nombre, u: 0, i: 0 });
+    variantesDe(p).forEach(v => { if (!vars[p.linea].has(v.etiqueta)) vars[p.linea].set(v.etiqueta, { label: v.etiqueta, nombre: v.sub, oz: v.oz ?? 999, u: 0, i: 0 }); });
+  });
   const porHora = new Array(24).fill(0), porDow = new Array(7).fill(0), porDia = new Map(), pagos = {};
   let ingresos = 0, unidades = 0, pedidos = 0;
 
@@ -823,20 +896,19 @@ function calcular(){
     const f = new Date(v.fecha), k = keyDia(f);
     pedidos++;
     its.forEach(it => {
-      const sub = it.precio * it.cantidad;
+      const sub = it.precio * it.cantidad, l = it.linea;
+      asegurar(l);
       ingresos += sub; unidades += it.cantidad;
-      porLinea[it.linea].u += it.cantidad; porLinea[it.linea].i += sub;
+      porLinea[l].u += it.cantidad; porLinea[l].i += sub;
       porHora[f.getHours()] += it.cantidad;
       porDow[f.getDay()] += sub;
-      if (!porDia.has(k)) porDia.set(k, { granizado: 0, frappe: 0 });
-      porDia.get(k)[it.linea] += sub;
+      porDia.set(k, (porDia.get(k) || 0) + sub);
       pagos[v.metodo] = (pagos[v.metodo] || 0) + sub;
-      const mp = prods[it.linea];
-      if (!mp.has(it.productoId)){ const a = S.productos.find(p => p.id === it.productoId); mp.set(it.productoId, { nombre: a ? a.nombre : it.nombre, u: 0, i: 0 }); }
-      const r = mp.get(it.productoId); r.u += it.cantidad; r.i += sub;
-      const tk = it.oz == null ? 'na' : String(it.oz);
-      if (!tams[it.linea].has(tk)) tams[it.linea].set(tk, { label: it.oz == null ? 'Sin tamaño' : it.oz + ' oz', nombre: '', oz: it.oz ?? 999, u: 0, i: 0 });
-      const t = tams[it.linea].get(tk); t.u += it.cantidad; t.i += sub;
+      if (!prods[l].has(it.productoId)){ const a = S.productos.find(p => p.id === it.productoId); prods[l].set(it.productoId, { nombre: a ? a.nombre : it.nombre, u: 0, i: 0 }); }
+      const r = prods[l].get(it.productoId); r.u += it.cantidad; r.i += sub;
+      const vk = varTxt(it) || 'Sin tamaño';
+      if (!vars[l].has(vk)) vars[l].set(vk, { label: vk, nombre: '', oz: it.oz ?? 999, u: 0, i: 0 });
+      const t = vars[l].get(vk); t.u += it.cantidad; t.i += sub;
     });
   });
 
@@ -846,18 +918,17 @@ function calcular(){
   const desde = ini ? new Date(ini) : new Date(fechas.length ? Math.min(...fechas) : Date.now());
   desde.setHours(0,0,0,0);
   const hoy = new Date(); hoy.setHours(0,0,0,0);
-  for (let d = new Date(desde); d <= hoy; d.setDate(d.getDate() + 1)){
-    const x = porDia.get(keyDia(d)) || { granizado: 0, frappe: 0 };
-    dias.push({ d: new Date(d), granizado: x.granizado, frappe: x.frappe });
-  }
+  for (let d = new Date(desde); d <= hoy; d.setDate(d.getDate() + 1)) dias.push({ d: new Date(d), v: porDia.get(keyDia(d)) || 0 });
   const cuentaDow = new Array(7).fill(0); dias.forEach(x => cuentaDow[x.d.getDay()]++);
   const orden = (a, b) => S.rankBy === 'u' ? b.u - a.u || b.i - a.i : b.i - a.i || b.u - a.u;
-  const ranking = {}, tamanos = {};
-  LINEA_IDS.forEach(l => {
+  const ranking = {}, variantes = {};
+  Object.keys(porLinea).forEach(l => {
     ranking[l] = [...prods[l].values()].sort(orden);
-    tamanos[l] = [...tams[l].values()].sort((a, b) => a.oz - b.oz);
+    variantes[l] = [...vars[l].values()].sort(esPorTamano(l) ? (a, b) => a.oz - b.oz : (a, b) => b.u - a.u);
   });
-  return { filtro, pedidos, ingresos, unidades, porLinea, ranking, tamanos, porHora, porDow, cuentaDow, dias, pagos };
+  // Categorías a mostrar, en su orden; también las borradas que tengan ventas en el periodo
+  const ids = [...lineaIds(), ...Object.keys(porLinea).filter(l => !LINEAS[l])].filter(l => porLinea[l] && (porLinea[l].u > 0 || LINEAS[l]?.activo !== false));
+  return { filtro, pedidos, ingresos, unidades, porLinea, ranking, variantes, porHora, porDow, cuentaDow, dias, pagos, ids };
 }
 
 function filasBarras(rows, total, color){
@@ -870,7 +941,7 @@ function renderStats(){
   segLineasStats();
   Object.values(charts).forEach(c => c.destroy()); for (const k in charts) delete charts[k];
   const D = calcular();
-  const lineas = D.filtro === 'todos' ? LINEA_IDS : [D.filtro];
+  const lineas = D.filtro === 'todos' ? D.ids : [D.filtro];
 
   if (!D.pedidos){
     $('#statsBody').innerHTML = `<div class="empty"><img src="data:image/webp;base64,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" alt=""><br>
@@ -893,33 +964,33 @@ function renderStats(){
     </div>`;
 
   if (D.filtro === 'todos'){
-    html += `<div class="card"><h3>Granizados vs Frappés</h3><p class="sub">Participación sobre los ingresos</p>
-      ${LINEA_IDS.map(l => filasBarras([{ titulo: LINEAS[l].nombre, sub: D.porLinea[l].u + ' unidades', v: D.porLinea[l].i,
-        der: fmt(D.porLinea[l].i) + '<small>' + (D.ingresos ? Math.round(D.porLinea[l].i / D.ingresos * 100) : 0) + '%</small>' }], D.ingresos, LINEAS[l].cssColor)).join('')}
+    html += `<div class="card"><h3>Ventas por categoría</h3><p class="sub">Participación sobre los ingresos</p>
+      ${[...lineas].sort((a, b) => D.porLinea[b].i - D.porLinea[a].i).map(l => filasBarras([{ titulo: esc(nombreLinea(l)), sub: D.porLinea[l].u + ' unidades', v: D.porLinea[l].i,
+        der: fmt(D.porLinea[l].i) + '<small>' + (D.ingresos ? Math.round(D.porLinea[l].i / D.ingresos * 100) : 0) + '%</small>' }], D.ingresos, colorLinea(l))).join('')}
     </div>`;
   }
 
   lineas.forEach(l => {
-    const rk = D.ranking[l];
-    const conTam = D.tamanos[l].filter(t => t.u > 0 || t.oz !== 999);
-    const totTam = conTam.reduce((a, t) => a + t.u, 0);
-    if (D.filtro === 'todos') html += `<div class="line-title" style="--c:${LINEAS[l].cssColor}">${LINEAS[l].nombre}</div>`;
+    const rk = D.ranking[l] || [], col = colorLinea(l), porTam = esPorTamano(l);
+    const vs = (D.variantes[l] || []).filter(t => t.u > 0 || t.oz !== 999 || !porTam);
+    const totVar = vs.reduce((a, t) => a + t.u, 0);
+    if (D.filtro === 'todos') html += `<div class="line-title" style="--c:${col}">${esc(nombreLinea(l))}</div>`;
     if (rk.length){
       const top = rk[0], low = [...rk].sort((a, b) => S.rankBy === 'u' ? a.u - b.u || a.i - b.i : a.i - b.i || a.u - b.u)[0];
       html += `<div class="duo">
-        <div class="hl" style="--c:${LINEAS[l].cssColor}"><div class="l">▲ Más vendido</div><div class="v">${esc(top.nombre)}</div><div class="s">${metric(top)}</div></div>
+        <div class="hl" style="--c:${col}"><div class="l">▲ Más vendido</div><div class="v">${esc(top.nombre)}</div><div class="s">${metric(top)}</div></div>
         ${rk.length > 1 ? `<div class="hl" style="--c:var(--muted)"><div class="l">▼ Menos vendido</div><div class="v">${esc(low.nombre)}</div><div class="s">${metric(low)}</div></div>` : ''}
       </div>
       <div class="card">
-        <div class="card-h"><div><h3>Sabores de ${LINEAS[l].nombre.toLowerCase()}</h3><p class="sub">${S.rankBy === 'u' ? 'Unidades vendidas' : 'Ingresos'} por sabor</p></div>${segRank}</div>
+        <div class="card-h"><div><h3>${porTam ? 'Sabores' : 'Productos'} · ${esc(nombreLinea(l))}</h3><p class="sub">${S.rankBy === 'u' ? 'Unidades vendidas' : 'Ingresos'} por ${porTam ? 'sabor' : 'producto'}</p></div>${segRank}</div>
         <div class="chartbox" style="height:${rk.length * 34 + 20}px"><canvas id="cRank-${l}"></canvas></div>
       </div>`;
     }
-    if (conTam.length){
-      html += `<div class="card"><h3>Tamaños de ${LINEAS[l].nombre.toLowerCase()}</h3><p class="sub">Unidades vendidas por tamaño de vaso</p>
-        ${filasBarras(conTam.map(t => ({ titulo: t.label, sub: t.nombre ? esc(t.nombre) : '', v: t.u,
-          der: t.u + ' u<small>' + fmt(t.i) + '</small>' })), Math.max(...conTam.map(t => t.u), 1), LINEAS[l].cssColor)}
-        <p class="sub" style="margin:6px 0 0">${totTam} unidades en total</p>
+    if (vs.length > (porTam ? 0 : 1)){
+      html += `<div class="card"><h3>${porTam ? 'Tamaños de vaso' : 'Presentaciones'} · ${esc(nombreLinea(l))}</h3><p class="sub">Unidades vendidas por ${porTam ? 'tamaño' : 'presentación'}</p>
+        ${filasBarras(vs.map(t => ({ titulo: esc(t.label), sub: t.nombre ? esc(t.nombre) : '', v: t.u,
+          der: t.u + ' u<small>' + fmt(t.i) + '</small>' })), Math.max(...vs.map(t => t.u), 1), col)}
+        <p class="sub" style="margin:6px 0 0">${totVar} unidades en total</p>
       </div>`;
     }
   });
@@ -946,9 +1017,10 @@ function renderStats(){
   dibujarGraficas(D, lineas, mostrarDias);
 }
 function segLineasStats(){
-  $('#statsTop').innerHTML = `<div class="seg big" id="segStats"></div>
+  $('#statsTop').innerHTML = `<div class="lchips" id="segStats"></div>
     <div class="chips">${RANGOS.map(([k, l]) => `<button class="chip ${k === S.rango ? 'on' : ''}" data-r="${k}">${l}</button>`).join('')}</div>`;
-  segLineas('#segStats', S.lineaStats, true);
+  if (S.lineaStats !== 'todos' && !LINEAS[S.lineaStats]) S.lineaStats = 'todos';
+  segLineas('#segStats', S.lineaStats, { conTodos: true, todas: true });
 }
 
 /* ---------- Gráficas (Chart.js) ---------- */
@@ -1004,28 +1076,22 @@ function dibujarGraficas(D, lineas, mostrarDias){
     });
   });
 
-  // 2) Ingresos por día (con "Todos" se ven las dos líneas por separado)
+  // 2) Ingresos por día
   if (mostrarDias){
     const o = opcionesBase();
     o.interaction = { mode: 'index', intersect: false };
     o.scales.y.ticks.callback = v => fmtK(v);
     o.scales.x.ticks.maxTicksLimit = 7; o.scales.x.ticks.maxRotation = 0;
-    o.plugins.tooltip.displayColors = lineas.length > 1;
     o.plugins.tooltip.callbacks = {
       title: c => { const d = D.dias[c[0].dataIndex].d; return DIAS[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1); },
-      label: c => (lineas.length > 1 ? c.dataset.label + ': ' : '') + fmt(c.parsed.y)
+      label: c => fmt(c.parsed.y)
     };
-    if (lineas.length > 1) o.plugins.legend = { display: true, position: 'top', align: 'start',
-      labels: { color: css('--ink'), usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 10, boxHeight: 10, font: { weight: '800', size: 12 } } };
     const ctx = document.getElementById('cDias').getContext('2d');
-    const datasets = lineas.map(l => {
-      const c = colorLinea(l);
-      let fondo = 'transparent';
-      if (lineas.length === 1){ fondo = ctx.createLinearGradient(0, 0, 0, 240); fondo.addColorStop(0, c + '40'); fondo.addColorStop(1, c + '00'); }
-      return { label: LINEAS[l].nombre, data: D.dias.map(x => x[l]), borderColor: c, backgroundColor: fondo, fill: lineas.length === 1,
-        borderWidth: 2, tension: .3, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: c, pointHoverBorderColor: css('--surface'), pointHoverBorderWidth: 2 };
-    });
-    charts.dias = new Chart(ctx, { type: 'line', data: { labels: D.dias.map(x => x.d.getDate() + '/' + (x.d.getMonth() + 1)), datasets }, options: o });
+    const c = colorBase;
+    const fondo = ctx.createLinearGradient(0, 0, 0, 240); fondo.addColorStop(0, c + '40'); fondo.addColorStop(1, c + '00');
+    charts.dias = new Chart(ctx, { type: 'line', data: { labels: D.dias.map(x => x.d.getDate() + '/' + (x.d.getMonth() + 1)),
+      datasets: [{ data: D.dias.map(x => x.v), borderColor: c, backgroundColor: fondo, fill: true, borderWidth: 2, tension: .3, pointRadius: 0, pointHoverRadius: 5,
+        pointHoverBackgroundColor: c, pointHoverBorderColor: css('--surface'), pointHoverBorderWidth: 2 }] }, options: o });
   }
 
   // 3) Horas pico
@@ -1063,7 +1129,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', (
 /* ===================================================================
    HISTORIAL
    =================================================================== */
-const textoItem = it => `${it.cantidad}× ${LINEAS[it.linea]?.uno || ''} ${esc(it.nombre)}${it.oz ? ' ' + it.oz + ' oz' : ''}`;
+const textoItem = it => `${it.cantidad}× ${esPorTamano(it.linea) ? esc(unoDe(it.linea)) + ' ' : ''}${esc(it.nombre)} ${esc(varTxt(it))}`.trim();
 function renderHist(){
   if (!S.ventas.length){ $('#histBody').innerHTML = '<div class="empty">Todavía no hay ventas registradas.</div>'; return; }
   const grupos = new Map();
@@ -1108,11 +1174,11 @@ function descargar(nombre, contenido, tipo){
 // CSV: una fila por producto vendido. Listo para Excel, Power BI o Python (pandas)
 $('#btnCsv').addEventListener('click', () => {
   if (!S.ventas.length) return toast('No hay ventas para exportar');
-  const filas = [['venta_id','fecha','hora','dia_semana','linea','sabor','tamano_oz','cantidad','precio_unitario','subtotal','metodo_pago','cierre_id']];
+  const filas = [['venta_id','fecha','hora','dia_semana','categoria','producto','presentacion','tamano_oz','cantidad','precio_unitario','subtotal','metodo_pago','cierre_id']];
   [...S.ventas].sort((a, b) => a.fecha.localeCompare(b.fecha)).forEach(v => {
     const f = new Date(v.fecha);
     v.items.forEach(it => filas.push([v.id, keyDia(f), String(f.getHours()).padStart(2,'0') + ':' + String(f.getMinutes()).padStart(2,'0'),
-      DIAS[f.getDay()], LINEAS[it.linea]?.uno || '', it.nombre, it.oz ?? '', it.cantidad, it.precio, it.precio * it.cantidad, v.metodo, v.cierreId || '']));
+      DIAS[f.getDay()], nombreLinea(it.linea), it.nombre, varTxt(it), it.oz ?? '', it.cantidad, it.precio, it.precio * it.cantidad, v.metodo, v.cierreId || '']));
   });
   descargarCsv('frio-intenso-ventas-' + keyDia(new Date()) + '.csv', filas);
 });
@@ -1124,7 +1190,7 @@ function descargarRespaldo(){
   const ahora = new Date();
   const hhmm = String(ahora.getHours()).padStart(2, '0') + String(ahora.getMinutes()).padStart(2, '0');
   descargar('frio-intenso-respaldo-' + keyDia(ahora) + '-' + hhmm + '.json',
-    JSON.stringify({ app: 'frio-intenso', version: 3, creado: ahora.toISOString(), productos: S.productos, tamanos: S.tamanos, ventas: S.ventas, cierres: S.cierres }), 'application/json');
+    JSON.stringify({ app: 'frio-intenso', version: 4, creado: ahora.toISOString(), lineas: S.lineas, productos: S.productos, tamanos: S.tamanos, ventas: S.ventas, cierres: S.cierres }), 'application/json');
 }
 $('#btnBackup').addEventListener('click', descargarRespaldo);
 $('#btnRestore').addEventListener('click', () => $('#fileRestore').click());
@@ -1134,6 +1200,7 @@ $('#fileRestore').addEventListener('change', async e => {
     const data = JSON.parse(await f.text());
     if (!Array.isArray(data.ventas) || !Array.isArray(data.productos)) throw new Error();
     if (!await confirmar(`Esto reemplaza los datos actuales${NUBE ? ' de la nube' : ''} por el respaldo (${data.ventas.length} ventas). ¿Continuar?`, 'Restaurar')) return;
+    S.lineas = Array.isArray(data.lineas) && data.lineas.length ? data.lineas : copia(LINEAS_INICIALES); indexarLineas();
     S.productos = migrarProductos(data.productos);
     S.tamanos = data.tamanos || S.tamanos;
     S.ventas = migrarVentas(data.ventas);
@@ -1190,51 +1257,60 @@ $('#datosCard').addEventListener('click', async e => {
 
 function renderProds(){
   renderDatos();
-  segLineas('#lineaProd', S.lineaProd, false);
-  const l = S.lineaProd, nom = LINEAS[l].nombre.toLowerCase();
-  const tams = tamanosDe(l);
-  const sabores = S.productos.filter(p => p.linea === l);
-  $('#prodsBody').innerHTML = `
-    <div class="sec-h" style="margin-top:6px"><b>Tamaños y precios</b><button class="btn sm" data-act="newTam">+ Tamaño</button></div>
+  if (S.lineaProd !== '__nueva' && !LINEAS[S.lineaProd]) S.lineaProd = lineaIds()[0] || '';
+  segLineas('#lineaProd', S.lineaProd, { todas: true, conNueva: true });
+  const l = S.lineaProd, L = LINEAS[l];
+  if (!L){ $('#prodsBody').innerHTML = '<div class="empty">Crea una categoría para empezar.</div>'; return; }
+  const porTam = esPorTamano(l), nom = L.nombre.toLowerCase();
+  const lista = S.productos.filter(p => p.linea === l);
+  let html = `<div class="sec-h" style="margin-top:4px"><b>${esc(L.nombre)} · ${porTam ? 'precio por tamaño de vaso' : 'precio por producto'}</b>
+    <button class="btn sm ghost" data-act="editLinea">Editar categoría</button></div>`;
+  if (porTam){
+    const tams = tamanosDe(l);
+    html += `<div class="sec-h"><b>Tamaños y precios</b><button class="btn sm" data-act="newTam">+ Tamaño</button></div>
     ${tams.length ? tams.map(t => `
       <div class="prow">
         <div class="ozb">${t.oz}<small>oz</small></div>
         <div class="d">${fmt(t.precio)}<small>${t.nombre ? esc(t.nombre) : 'Vaso de ' + t.oz + ' onzas'}</small></div>
         <button class="icon-btn" data-act="editTam" data-id="${t.id}" aria-label="Editar tamaño">${ICON_EDIT}</button>
         <button class="icon-btn del" data-act="delTam" data-id="${t.id}" aria-label="Eliminar tamaño">${ICON_TRASH}</button>
-      </div>`).join('') : `<div class="empty">Sin tamaños de ${nom}. Agrega al menos uno para poder venderlos.</div>`}
-
-    <div class="sec-h"><b>Sabores</b><button class="btn sm" data-act="newProd">+ Sabor</button></div>
-    ${sabores.length ? sabores.map(p => `
-      <div class="prow ${p.activo ? '' : 'off'}">
+      </div>`).join('') : `<div class="empty">Sin tamaños de ${esc(nom)}. Agrega al menos uno para poder venderlos.</div>`}`;
+  }
+  html += `<div class="sec-h"><b>${porTam ? 'Sabores' : 'Productos'}</b><button class="btn sm" data-act="newProd">+ ${porTam ? 'Sabor' : 'Producto'}</button></div>
+    ${lista.length ? lista.map(p => {
+      const detalle = porTam ? '' : (p.presentaciones || []).map(x => esc(x.nombre) + ' ' + fmt(x.precio)).join(' · ') || 'Sin precio';
+      return `<div class="prow ${p.activo ? '' : 'off'}">
         <span class="dot" style="--c:${p.color}"></span>
-        <div class="d">${esc(p.nombre)}<small>${p.activo ? 'Visible en la caja' : 'Oculto en la caja'}</small></div>
-        <button class="icon-btn" data-act="editProd" data-id="${p.id}" aria-label="Editar sabor">${ICON_EDIT}</button>
-        <button class="icon-btn del" data-act="delProd" data-id="${p.id}" aria-label="Eliminar sabor">${ICON_TRASH}</button>
-      </div>`).join('') : `<div class="empty">Sin sabores de ${nom}.</div>`}`;
+        <div class="d">${esc(p.nombre)}<small>${detalle ? detalle + ' · ' : ''}${p.activo ? 'Visible en la caja' : 'Oculto en la caja'}</small></div>
+        <button class="icon-btn" data-act="editProd" data-id="${p.id}" aria-label="Editar">${ICON_EDIT}</button>
+        <button class="icon-btn del" data-act="delProd" data-id="${p.id}" aria-label="Eliminar">${ICON_TRASH}</button>
+      </div>`; }).join('') : `<div class="empty">Sin ${porTam ? 'sabores' : 'productos'} en ${esc(nom)}.</div>`}`;
+  $('#prodsBody').innerHTML = html;
 }
 $('#lineaProd').addEventListener('click', e => {
   const b = e.target.closest('[data-l]'); if (!b) return;
+  if (b.dataset.l === '__nueva') return editarLinea(null);
   S.lineaProd = b.dataset.l; renderProds();
 });
 $('#prodsBody').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const id = b.dataset.id;
   ({ newTam: () => editarTamano(null), editTam: () => editarTamano(id), delTam: () => borrarTamano(id),
-     newProd: () => editarProducto(null), editProd: () => editarProducto(id), delProd: () => borrarProducto(id) })[b.dataset.act]();
+     newProd: () => editarProducto(null), editProd: () => editarProducto(id), delProd: () => borrarProducto(id),
+     editLinea: () => editarLinea(S.lineaProd) })[b.dataset.act]();
 });
 
 async function borrarProducto(id){
   const p = S.productos.find(x => x.id === id); if (!p) return;
-  if (!await confirmar(`¿Eliminar el sabor "${p.nombre}" de ${LINEAS[p.linea].nombre.toLowerCase()}? Las ventas pasadas se conservan.`)) return;
+  if (!await confirmar(`¿Eliminar "${p.nombre}" de ${nombreLinea(p.linea).toLowerCase()}? Las ventas pasadas se conservan.`)) return;
   S.productos = S.productos.filter(x => x.id !== id);
   Object.keys(S.pedido).forEach(k => { if (k.startsWith(id + '|')) delete S.pedido[k]; });
   closeSheet(); render();
-  if (await guardar(DB.deleteProducto(id))) toast('Sabor eliminado');
+  if (await guardar(DB.deleteProducto(id))) toast('Producto eliminado');
 }
 async function borrarTamano(id){
   const l = S.lineaProd, t = (S.tamanos[l] || []).find(x => x.id === id); if (!t) return;
-  if (!await confirmar(`¿Eliminar el vaso de ${t.oz} oz de ${LINEAS[l].nombre.toLowerCase()}? Las ventas pasadas se conservan.`)) return;
+  if (!await confirmar(`¿Eliminar el vaso de ${t.oz} oz de ${nombreLinea(l).toLowerCase()}? Las ventas pasadas se conservan.`)) return;
   S.tamanos[l] = S.tamanos[l].filter(x => x.id !== id);
   Object.keys(S.pedido).forEach(k => { if (k.endsWith('|' + id)) delete S.pedido[k]; });
   closeSheet(); render();
@@ -1243,10 +1319,11 @@ async function borrarTamano(id){
 
 function editarTamano(id){
   const l = S.lineaProd;
+  if (!S.tamanos[l]) S.tamanos[l] = [];
   const t = id ? S.tamanos[l].find(x => x.id === id) : { oz: '', nombre: '', precio: '' };
   openSheet(`
     <h3>${id ? 'Editar tamaño' : 'Nuevo tamaño'}</h3>
-    <p class="sub">${LINEAS[l].nombre}</p>
+    <p class="sub">${esc(nombreLinea(l))}</p>
     <div class="two">
       <div><label class="f">Onzas (oz)</label><input class="in" id="tOz" type="number" inputmode="decimal" min="1" step="1" value="${t.oz}" placeholder="16"></div>
       <div><label class="f">Precio (COP)</label><input class="in" id="tPrecio" type="number" inputmode="numeric" min="0" step="500" value="${t.precio}" placeholder="8000"></div>
@@ -1273,16 +1350,41 @@ function editarTamano(id){
   };
 }
 
+// Editor de presentaciones (para categorías con precio por producto)
+function filasPres(lista){
+  return lista.map(x => `<div class="pres-row" data-pid="${x.id}">
+      <input class="in" data-pn value="${esc(x.nombre)}" placeholder="Ej: Botella" maxlength="20">
+      <input class="in" data-pp type="number" inputmode="numeric" min="0" step="500" value="${x.precio}" placeholder="Precio">
+      <button class="icon-btn del" data-prdel aria-label="Quitar">✕</button>
+    </div>`).join('');
+}
+function leerPres(){
+  return [...document.querySelectorAll('#fPres .pres-row')].map(r => ({
+    id: r.dataset.pid, nombre: r.querySelector('[data-pn]').value.trim(), precio: Math.round(Number(r.querySelector('[data-pp]').value))
+  }));
+}
 function editarProducto(id){
   const p = id ? S.productos.find(x => x.id === id)
-    : { nombre: '', linea: S.lineaProd, color: COLORES[S.productos.length % COLORES.length], activo: true };
+    : { nombre: '', linea: S.lineaProd, color: COLORES[S.productos.length % COLORES.length], activo: true, presentaciones: null };
   S.editColor = p.color;
+  let presTmp = (p.presentaciones && p.presentaciones.length ? p.presentaciones : [{ id: uid(), nombre: 'Unidad', precio: '' }]).map(x => ({ ...x }));
+  const pintarPres = () => {
+    const l = $('#fLinea').value, porTam = esPorTamano(l);
+    $('#fPresBox').style.display = porTam ? 'none' : 'block';
+    $('#fTitulo').textContent = (id ? 'Editar ' : 'Nuevo ') + (porTam ? 'sabor' : 'producto');
+  };
   openSheet(`
-    <h3>${id ? 'Editar sabor' : 'Nuevo sabor'}</h3>
-    <label class="f">Nombre del sabor</label>
-    <input class="in" id="fNombre" value="${esc(p.nombre)}" placeholder="Ej: Maracuyá" maxlength="30">
-    <label class="f">Línea</label>
-    <select class="in" id="fLinea">${LINEA_IDS.map(l => `<option value="${l}" ${l === p.linea ? 'selected' : ''}>${LINEAS[l].nombre}</option>`).join('')}</select>
+    <h3 id="fTitulo"></h3>
+    <label class="f">Nombre</label>
+    <input class="in" id="fNombre" value="${esc(p.nombre)}" placeholder="Ej: Maracuyá, Club Colombia, Aguardiente…" maxlength="30">
+    <label class="f">Categoría</label>
+    <select class="in" id="fLinea">${lineasOrden().map(l => `<option value="${l.id}" ${l.id === p.linea ? 'selected' : ''}>${esc(l.nombre)}</option>`).join('')}</select>
+    <div id="fPresBox">
+      <label class="f">Presentaciones y precios</label>
+      <p class="sub" style="margin:0 0 8px">Ej: Trago, Media, Botella. Si solo se vende de una forma, deja una sola ("Unidad").</p>
+      <div id="fPres">${filasPres(presTmp)}</div>
+      <button class="btn sm ghost" id="fAddPres">+ Presentación</button>
+    </div>
     <label class="f">Color en la caja</label>
     <div class="swatches">${COLORES.map(c => `<button class="sw ${c === p.color ? 'on' : ''}" style="--c:${c}" data-c="${c}" aria-label="Color"></button>`).join('')}</div>
     <label class="check"><input type="checkbox" id="fActivo" ${p.activo ? 'checked' : ''}> Mostrar en la caja</label>
@@ -1290,22 +1392,90 @@ function editarProducto(id){
       ${id ? '<button class="btn danger" id="fDel">Eliminar</button>' : '<button class="btn ghost" id="fCancel">Cancelar</button>'}
       <button class="btn" id="fSave">Guardar</button>
     </div>`);
+  pintarPres();
+  $('#fLinea').onchange = pintarPres;
   $('#sheet').onclick = async e => {
     const sw = e.target.closest('[data-c]');
     if (sw){ S.editColor = sw.dataset.c; document.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === sw)); return; }
+    if (e.target.id === 'fAddPres'){ $('#fPres').insertAdjacentHTML('beforeend', filasPres([{ id: uid(), nombre: '', precio: '' }])); $('#fPres .pres-row:last-child [data-pn]').focus(); return; }
+    if (e.target.closest('[data-prdel]')){
+      if (document.querySelectorAll('#fPres .pres-row').length <= 1) return toast('Debe quedar al menos una presentación');
+      e.target.closest('.pres-row').remove(); return;
+    }
     if (e.target.id === 'fCancel') return closeSheet();
     if (e.target.id === 'fDel') return borrarProducto(id);
     if (e.target.id !== 'fSave') return;
     const nombre = $('#fNombre').value.trim();
     if (!nombre) return toast('Escribe el nombre');
     const linea = $('#fLinea').value;
-    if (S.productos.some(x => x.id !== id && x.linea === linea && x.nombre.toLowerCase() === nombre.toLowerCase())) return toast('Ese sabor ya existe en ' + LINEAS[linea].nombre.toLowerCase());
+    if (S.productos.some(x => x.id !== id && x.linea === linea && x.nombre.toLowerCase() === nombre.toLowerCase())) return toast('Ese producto ya existe en ' + nombreLinea(linea).toLowerCase());
     const datos = { nombre, linea, color: S.editColor, activo: $('#fActivo').checked };
-    if (id && p.linea !== linea) Object.keys(S.pedido).forEach(k => { if (k.startsWith(id + '|')) delete S.pedido[k]; });
+    if (!esPorTamano(linea)){
+      const lista = leerPres();
+      if (lista.some(x => !x.nombre)) return toast('Ponle nombre a cada presentación');
+      if (lista.some(x => !(x.precio > 0))) return toast('Ponle precio a cada presentación');
+      if (new Set(lista.map(x => x.nombre.toLowerCase())).size !== lista.length) return toast('Hay presentaciones repetidas');
+      datos.presentaciones = lista;
+    }
+    Object.keys(S.pedido).forEach(k => { if (id && k.startsWith(id + '|')) delete S.pedido[k]; });
     let obj = p;
-    if (id) Object.assign(p, datos); else { obj = { id: uid(), ...datos }; S.productos.push(obj); }
+    if (id) Object.assign(p, datos); else { obj = { id: uid(), presentaciones: null, ...datos }; S.productos.push(obj); }
     closeSheet(); render();
-    if (await guardar(DB.upsertProducto(obj))) toast('Sabor guardado');
+    if (await guardar(DB.upsertProducto(obj))) toast('Producto guardado');
+  };
+}
+
+// Editor de categorías
+function editarLinea(id){
+  const L = id ? LINEAS[id] : { nombre: '', tipo: 'producto', color: COLORES_LINEA[S.lineas.length % COLORES_LINEA.length], activo: true };
+  const enUso = id ? S.productos.some(p => p.linea === id) || (S.tamanos[id] || []).length > 0 : false;
+  let color = L.color;
+  openSheet(`
+    <h3>${id ? 'Editar categoría' : 'Nueva categoría'}</h3>
+    <label class="f">Nombre</label>
+    <input class="in" id="cgNombre" value="${esc(L.nombre)}" placeholder="Ej: Gaseosas, Snacks, Cócteles" maxlength="24">
+    <label class="f">¿Cómo se pone el precio?</label>
+    <label class="opt"><input type="radio" name="cgTipo" value="tamanos" ${L.tipo === 'tamanos' ? 'checked' : ''} ${enUso ? 'disabled' : ''}>
+      <span>Por tamaño de vaso<small>Todos los sabores cuestan lo mismo según las onzas (como granizados y frappés)</small></span></label>
+    <label class="opt"><input type="radio" name="cgTipo" value="producto" ${L.tipo !== 'tamanos' ? 'checked' : ''} ${enUso ? 'disabled' : ''}>
+      <span>Precio por producto<small>Cada producto tiene su precio y sus presentaciones (como cervezas, licores o agua)</small></span></label>
+    ${enUso ? '<p class="sub" style="margin:0">El tipo no se puede cambiar porque la categoría ya tiene productos.</p>' : ''}
+    <label class="f">Color</label>
+    <div class="swatches">${COLORES_LINEA.map(c => `<button class="sw ${c === color ? 'on' : ''}" style="--c:${c}" data-c="${c}" aria-label="Color"></button>`).join('')}</div>
+    <label class="check"><input type="checkbox" id="cgActivo" ${L.activo !== false ? 'checked' : ''}> Mostrar en la caja</label>
+    <div class="row2">
+      ${id ? '<button class="btn danger" id="cgDel">Eliminar</button>' : '<button class="btn ghost" id="cgCancel">Cancelar</button>'}
+      <button class="btn" id="cgSave">Guardar</button>
+    </div>`);
+  $('#sheet').onclick = async e => {
+    const sw = e.target.closest('[data-c]');
+    if (sw){ color = sw.dataset.c; document.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === sw)); return; }
+    if (e.target.id === 'cgCancel') return closeSheet();
+    if (e.target.id === 'cgDel'){
+      if (enUso) return toast('Primero borra o mueve sus productos y tamaños');
+      if (!await confirmar(`¿Eliminar la categoría "${L.nombre}"? Las ventas pasadas se conservan.`)) return;
+      S.lineas = S.lineas.filter(x => x.id !== id); indexarLineas();
+      S.lineaProd = lineaIds()[0] || '';
+      closeSheet(); render();
+      if (await guardar(DB.deleteLinea(id))) toast('Categoría eliminada');
+      return;
+    }
+    if (e.target.id !== 'cgSave') return;
+    const nombre = $('#cgNombre').value.trim();
+    if (!nombre) return toast('Escribe el nombre');
+    if (S.lineas.some(x => x.id !== id && x.nombre.toLowerCase() === nombre.toLowerCase())) return toast('Ya existe esa categoría');
+    const tipo = document.querySelector('[name="cgTipo"]:checked').value;
+    const datos = { nombre, tipo, color, activo: $('#cgActivo').checked };
+    let obj = L;
+    if (id){ if (L.uno === L.nombre || !L.uno) datos.uno = nombre; Object.assign(L, datos); }
+    else {
+      obj = { id: uid(), uno: nombre, orden: Math.max(0, ...S.lineas.map(x => x.orden || 0)) + 1, ...datos };
+      S.lineas.push(obj); S.tamanos[obj.id] = [];
+    }
+    indexarLineas(); S.lineaProd = obj.id;
+    closeSheet(); render();
+    if (S.faltaActualizar) return toast('Falta actualizar la base de datos (ver aviso)');
+    if (await guardar(DB.upsertLinea(obj))) toast('Categoría guardada');
   };
 }
 
@@ -1325,12 +1495,14 @@ const diffBadge = d => d === null || d === undefined ? '<span class="diff na">Si
   : d === 0 ? '<span class="diff ok">Cuadró ✓</span>'
   : d > 0 ? `<span class="diff mas">Sobrante ${fmt(d)}</span>` : `<span class="diff menos">Faltante ${fmt(-d)}</span>`;
 
+// Ordena ids de categoría según el orden configurado (las borradas van al final)
+const ordenarLineas = ids => { const ord = lineaIds(); return [...ids].sort((a, b) => (ord.indexOf(a) + 1 || 99) - (ord.indexOf(b) + 1 || 99)); };
 function resumenVentas(vs){
-  const r = { total: 0, pedidos: vs.length, unidades: 0, porMetodo: {}, porLinea: { granizado: 0, frappe: 0 }, unidadesLinea: { granizado: 0, frappe: 0 }, primera: null, ultima: null };
+  const r = { total: 0, pedidos: vs.length, unidades: 0, porMetodo: {}, porLinea: {}, unidadesLinea: {}, primera: null, ultima: null };
   vs.forEach(v => {
     r.total += v.total;
     r.porMetodo[v.metodo] = (r.porMetodo[v.metodo] || 0) + v.total;
-    v.items.forEach(it => { const l = it.linea === 'frappe' ? 'frappe' : 'granizado'; r.unidades += it.cantidad; r.porLinea[l] += it.precio * it.cantidad; r.unidadesLinea[l] += it.cantidad; });
+    v.items.forEach(it => { const l = it.linea || 'otros'; r.unidades += it.cantidad; r.porLinea[l] = (r.porLinea[l] || 0) + it.precio * it.cantidad; r.unidadesLinea[l] = (r.unidadesLinea[l] || 0) + it.cantidad; });
     if (!r.primera || v.fecha < r.primera) r.primera = v.fecha;
     if (!r.ultima || v.fecha > r.ultima) r.ultima = v.fecha;
   });
@@ -1381,8 +1553,8 @@ function renderCierre(){
       <div class="card">
         <h3>Por método de pago</h3>
         ${METODOS.concat(Object.keys(r.porMetodo).filter(m => !METODOS.includes(m))).filter(m => r.porMetodo[m]).map(m => `<div class="kv"><span>${esc(m)}</span><span>${fmt(r.porMetodo[m])}</span></div>`).join('')}
-        <h3 style="margin-top:14px">Por línea</h3>
-        ${LINEA_IDS.map(l => `<div class="kv"><span>${LINEAS[l].nombre} · ${r.unidadesLinea[l]} u</span><span>${fmt(r.porLinea[l])}</span></div>`).join('')}
+        <h3 style="margin-top:14px">Por categoría</h3>
+        ${ordenarLineas(Object.keys(r.porLinea)).map(l => `<div class="kv"><span>${esc(nombreLinea(l))} · ${r.unidadesLinea[l]} u</span><span>${fmt(r.porLinea[l])}</span></div>`).join('')}
       </div>
       <div class="card" id="cuadre">
         <h3>Cuadre de efectivo</h3>
@@ -1457,11 +1629,11 @@ function renderCierreStats(){
   if (S.rangoCierre !== 'todo'){ const d = new Date(); d.setDate(d.getDate() - (Number(S.rangoCierre) - 1)); ini = keyDia(d); }
   const porDia = new Map();
   S.cierres.filter(c => !ini || c.dia >= ini).forEach(c => {
-    if (!porDia.has(c.dia)) porDia.set(c.dia, { dia: c.dia, total: 0, pedidos: 0, porMetodo: {}, porLinea: { granizado: 0, frappe: 0 }, dif: null, cerradoEn: c.cerradoEn });
+    if (!porDia.has(c.dia)) porDia.set(c.dia, { dia: c.dia, total: 0, pedidos: 0, porMetodo: {}, porLinea: {}, dif: null, cerradoEn: c.cerradoEn });
     const x = porDia.get(c.dia);
     x.total += c.total; x.pedidos += c.pedidos;
     Object.entries(c.porMetodo).forEach(([m, v]) => x.porMetodo[m] = (x.porMetodo[m] || 0) + v);
-    LINEA_IDS.forEach(l => x.porLinea[l] += (c.porLinea?.[l] || 0));
+    Object.entries(c.porLinea || {}).forEach(([l, v]) => x.porLinea[l] = (x.porLinea[l] || 0) + v);
     if (c.diferencia !== null && c.diferencia !== undefined) x.dif = (x.dif || 0) + c.diferencia;
     if (c.cerradoEn > x.cerradoEn) x.cerradoEn = c.cerradoEn;   // hora del último cierre del día
   });
@@ -1501,7 +1673,7 @@ function renderCierreStats(){
   o1.plugins.tooltip.callbacks = { title: tituloDia, label: c => {
     const d = dias[c.dataIndex];
     return ['Total: ' + fmt(d.total), d.pedidos + ' pedidos', ...Object.entries(d.porMetodo).map(([m, v]) => m + ': ' + fmt(v)),
-      ...LINEA_IDS.map(l => LINEAS[l].nombre + ': ' + fmt(d.porLinea[l]))];
+      ...ordenarLineas(Object.keys(d.porLinea)).filter(l => d.porLinea[l]).map(l => nombreLinea(l) + ': ' + fmt(d.porLinea[l]))];
   } };
   chartsC.total = new Chart(document.getElementById('cCierres'), {
     type: 'bar', data: { labels, datasets: [{ data: dias.map(d => d.total), backgroundColor: css('--primary'), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 26 }] }, options: o1
@@ -1566,7 +1738,7 @@ function verCierre(id){
     <div class="big-total">${fmt(c.total)}</div>
     <div class="mini"><div>Pedidos<b>${c.pedidos}</b></div><div>Unidades<b>${c.unidades}</b></div><div>Ticket prom.<b>${fmtK(Math.round(c.total / Math.max(c.pedidos, 1)))}</b></div></div>
     ${Object.entries(c.porMetodo).map(([m, v]) => `<div class="kv"><span>${esc(m)}</span><span>${fmt(v)}</span></div>`).join('')}
-    ${LINEA_IDS.map(l => `<div class="kv"><span>${LINEAS[l].nombre}${c.unidadesLinea ? ' · ' + c.unidadesLinea[l] + ' u' : ''}</span><span>${fmt(c.porLinea?.[l] || 0)}</span></div>`).join('')}
+    ${ordenarLineas(Object.keys(c.porLinea || {})).map(l => `<div class="kv"><span>${esc(nombreLinea(l))}${c.unidadesLinea && c.unidadesLinea[l] != null ? ' · ' + c.unidadesLinea[l] + ' u' : ''}</span><span>${fmt(c.porLinea[l] || 0)}</span></div>`).join('')}
     <label class="f">Cuadre de efectivo</label>
     <div class="kv"><span>Base</span><span>${fmt(c.base)}</span></div>
     <div class="kv"><span>Ventas en efectivo</span><span>${fmt(c.efectivoVentas)}</span></div>
@@ -1589,11 +1761,11 @@ function verCierre(id){
 }
 function exportarCierres(){
   const filas = [['cierre_id','dia','hora_cierre','primera_venta','ultima_venta','pedidos','unidades','total',
-    ...METODOS.map(m => m.toLowerCase()), 'granizados','frappes','base','efectivo_esperado','efectivo_contado','diferencia','responsable','nota']];
+    ...METODOS.map(m => m.toLowerCase()), ...lineaIds().map(l => 'cat_' + nombreLinea(l).toLowerCase().replace(/\s+/g, '_')), 'base','efectivo_esperado','efectivo_contado','diferencia','responsable','nota']];
   [...S.cierres].sort((a, b) => a.cerradoEn.localeCompare(b.cerradoEn)).forEach(c => {
     const hhmm = iso => { if (!iso) return ''; const f = new Date(iso); return String(f.getHours()).padStart(2,'0') + ':' + String(f.getMinutes()).padStart(2,'0'); };
     filas.push([c.id, c.dia, hhmm(c.cerradoEn), hhmm(c.primera), hhmm(c.ultima), c.pedidos, c.unidades, c.total,
-      ...METODOS.map(m => c.porMetodo[m] || 0), c.porLinea?.granizado || 0, c.porLinea?.frappe || 0,
+      ...METODOS.map(m => c.porMetodo[m] || 0), ...lineaIds().map(l => c.porLinea?.[l] || 0),
       c.base, c.efectivoEsperado, c.efectivoContado ?? '', c.diferencia ?? '', c.responsable, c.nota]);
   });
   descargarCsv('frio-intenso-cierres-' + keyDia(new Date()) + '.csv', filas);
@@ -1603,11 +1775,12 @@ function exportarCierres(){
 async function cargarDemo(){
   if (S.ventas.length && !await confirmar('Esto reemplaza las ventas actuales por datos de ejemplo. ¿Continuar?', 'Reemplazar')) return;
   const porLinea = {};
-  LINEA_IDS.forEach(l => { porLinea[l] = { prods: S.productos.filter(p => p.activo && p.linea === l), tams: tamanosDe(l) }; });
-  const disponibles = LINEA_IDS.filter(l => porLinea[l].prods.length && porLinea[l].tams.length);
-  if (!disponibles.length) return toast('Primero agrega sabores y tamaños');
+  lineasActivas().forEach(L => { const prods = S.productos.filter(p => p.activo && p.linea === L.id && variantesDe(p).length); if (prods.length) porLinea[L.id] = prods; });
+  const disponibles = Object.keys(porLinea);
+  if (!disponibles.length) return toast('Primero agrega productos con precio');
+  const pesoLinea = { granizado: 45, frappe: 25, cerveza: 15, licor: 8, agua: 7 };
   const pesoP = [5, 3.6, 4.2, 2.4, 1.1, 2, 3, 2.5, 1.5, 2];
-  const pesoT = n => n === 3 ? [3, 5, 2] : n === 2 ? [3, 2] : new Array(n).fill(1);
+  const pesoV = (vs, porTam) => porTam ? (vs.length === 3 ? [3, 5, 2] : vs.map(() => 1)) : vs.map((_, i) => [6, 2, 1][i] ?? 1);
   const elegir = (arr, pesos) => { const s = pesos.reduce((a, b) => a + b, 0); let r = Math.random() * s; for (let i = 0; i < arr.length; i++){ r -= pesos[i]; if (r <= 0) return arr[i]; } return arr[0]; };
   const pesoHora = { 10:1, 11:2, 12:4, 13:5, 14:7, 15:8, 16:7, 17:6, 18:4, 19:3, 20:2, 21:1 };
   const horasL = Object.keys(pesoHora).map(Number);
@@ -1622,11 +1795,11 @@ async function cargarDemo(){
       const nItems = Math.random() < .7 ? 1 : Math.random() < .75 ? 2 : 3;
       const mapa = {};
       for (let k = 0; k < nItems; k++){
-        const l = disponibles.length > 1 ? (Math.random() < .64 ? 'granizado' : 'frappe') : disponibles[0];
-        const { prods, tams } = porLinea[l];
-        const p = elegir(prods, prods.map((_, j) => pesoP[j] ?? 2)), t = elegir(tams, pesoT(tams.length));
+        const l = elegir(disponibles, disponibles.map(x => pesoLinea[x] ?? 5));
+        const prods = porLinea[l];
+        const p = elegir(prods, prods.map((_, j) => pesoP[j] ?? 2)), vs = variantesDe(p), t = elegir(vs, pesoV(vs, esPorTamano(l)));
         const key = p.id + '|' + t.id;
-        if (!mapa[key]) mapa[key] = { productoId: p.id, nombre: p.nombre, linea: l, tamanoId: t.id, oz: t.oz, precio: t.precio, cantidad: 0 };
+        if (!mapa[key]) mapa[key] = { productoId: p.id, nombre: p.nombre, linea: l, tamanoId: t.id, oz: t.oz, variante: t.etiqueta, precio: t.precio, cantidad: 0 };
         mapa[key].cantidad++;
       }
       const items = Object.values(mapa);
@@ -1677,9 +1850,18 @@ async function cargarDatos(){
     desdeCache = true;
   }
   const vacio = !d.productos && !d.tamanos && !(d.ventas || []).length;
+  // Categorías: si todavía no existen (versión anterior), se crean las de ejemplo y sus productos
+  const nuevasLineas = !d.lineas || !d.lineas.length;
+  S.lineas = nuevasLineas ? copia(LINEAS_INICIALES) : d.lineas;
+  indexarLineas();
   S.productos = d.productos ? migrarProductos(d.productos) : (vacio ? PRODUCTOS_INICIALES.map(p => ({ ...p })) : []);
-  S.tamanos = d.tamanos || (vacio ? copia(TAMANOS_INICIALES) : { granizado: [], frappe: [] });
-  LINEA_IDS.forEach(l => { if (!Array.isArray(S.tamanos[l])) S.tamanos[l] = []; });
+  S.tamanos = d.tamanos || (vacio ? copia(TAMANOS_INICIALES) : {});
+  lineaIds().forEach(l => { if (!Array.isArray(S.tamanos[l])) S.tamanos[l] = []; });
+  let extras = [];
+  if (nuevasLineas && !(NUBE && (S.faltaActualizar || desdeCache))){
+    extras = PRODUCTOS_EXTRA.filter(p => !S.productos.some(x => x.id === p.id || x.linea === p.linea)).map(p => copia(p));
+    S.productos.push(...extras);
+  }
   S.ventas = migrarVentas(d.ventas || []);
   S.cierres = d.cierres || [];
   ultimaCarga = Date.now();
@@ -1688,13 +1870,15 @@ async function cargarDatos(){
   // Ventas hechas sin internet que todavía no llegan a la nube
   Cola.leer().forEach(v => { if (!S.ventas.some(x => x.id === v.id)) S.ventas.push(v); });
   if (desdeCache) toast('Sin internet: mostrando los últimos datos guardados');
-  else if (vacio){
-    // Primera vez en la nube: crea los sabores y tamaños de ejemplo
-    await guardar((async () => {
-      await insertarEnTrozos('productos', S.productos.map(Fila.producto));
-      await insertarEnTrozos('tamanos', LINEA_IDS.flatMap(l => S.tamanos[l].map(t => Fila.tamano(l, t))));
-    })());
+  else {
+    // Primera vez en la nube (o primera vez con categorías): guarda lo de ejemplo
+    const tareas = [];
+    if (vacio){ tareas.push(insertarEnTrozos('productos', S.productos.map(Fila.producto))); tareas.push(insertarEnTrozos('tamanos', filasTamanos(S.tamanos))); }
+    else if (extras.length) tareas.push(insertarEnTrozos('productos', extras.map(Fila.producto)));
+    if (nuevasLineas && !S.faltaActualizar) tareas.push(insertarEnTrozos('lineas', S.lineas.map(Fila.linea)));
+    if (tareas.length) await guardar(Promise.all(tareas));
   }
+  pintarEstadoNube();
 }
 // Copia de los datos en el celular para poder abrir la app sin internet.
 // Guarda los últimos 180 días de ventas (suficiente para las estadísticas del día a día).
@@ -1704,7 +1888,7 @@ function guardarCache(ya){
   clearTimeout(tCache);
   const hacer = () => {
     const desde = new Date(Date.now() - 180 * 864e5).toISOString();
-    Almacen.set('fi_cache', { productos: S.productos, tamanos: S.tamanos, cierres: S.cierres, ventas: S.ventas.filter(v => v.fecha >= desde) });
+    Almacen.set('fi_cache', { lineas: S.faltaActualizar ? null : S.lineas, productos: S.productos, tamanos: S.tamanos, cierres: S.cierres, ventas: S.ventas.filter(v => v.fecha >= desde) });
   };
   ya ? hacer() : (tCache = setTimeout(hacer, 1500));
 }
