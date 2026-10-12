@@ -376,6 +376,24 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   .mesa-hint{font-size:12px;font-weight:700;color:var(--muted);margin:8px 2px 0}
   .vend-mesa{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--ocup) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--ocup) 45%,transparent);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-weight:700;font-size:14px}
   .vend-mesa span{flex:1}
+  .mesa-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .mesa-top h2{margin:0;line-height:1.1}
+  .mesa-top small{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+  .mesa-top .stepper{margin-left:auto;font-size:15px}
+  .mesa-top .stepper .icon-btn{width:34px;height:34px;font-size:18px}
+  .mesa-pos{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+  .mesa-pos > div{min-width:0}
+  .mesa-top > div{min-width:0}
+  .pos-cuenta{display:none}
+  @media(min-width:900px){
+    .mesa-pos{grid-template-columns:minmax(0,1fr) 360px}
+    .pos-cuenta{display:block;position:sticky;top:84px;max-height:calc(100vh - 170px);overflow:auto}
+    #cuentaBar{display:none !important}
+    #v-mesa .grid{grid-template-columns:repeat(3,1fr)}
+  }
+  .pos-cuenta .line{padding:8px 0}
+  .pos-cuenta .icon-btn{width:34px;height:34px;font-size:18px}
+  .pos-cuenta .st{width:70px}
   .mesa-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
   .mesa-pick button{border:2px solid var(--libre);background:var(--surface2);border-radius:12px;padding:12px;text-align:left;font-weight:800;color:var(--ink)}
   .mesa-pick button.ocup{border-color:var(--ocup)}
@@ -432,6 +450,18 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   <section class="view active" id="v-mesas">
     <div id="mesasTop"></div>
     <div id="mesasBody"></div>
+  </section>
+
+  <!-- ===================== UNA MESA (productos + cuenta) ===================== -->
+  <section class="view" id="v-mesa">
+    <div id="mesaTop"></div>
+    <div class="mesa-pos">
+      <div>
+        <div class="lchips" id="lineaMesa"></div>
+        <div class="grid" id="mesaGrid"></div>
+      </div>
+      <aside class="card pos-cuenta" id="mesaCuenta"></aside>
+    </div>
   </section>
 
   <!-- ===================== VENDER ===================== -->
@@ -494,6 +524,13 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   <div class="info"><small id="obCount">0 productos</small><b id="obTotal">$0</b></div>
   <button class="btn ghost" id="btnAMesa">A mesa</button>
   <button class="btn" id="btnCobrar">Cobrar</button>
+</div>
+
+<!-- Barra de la cuenta de la mesa (celular) -->
+<div class="orderbar" id="cuentaBar">
+  <div class="info"><small id="cbCount">Cuenta vacía</small><b id="cbTotal">$0</b></div>
+  <button class="btn ghost" id="btnVerCuenta">Ver cuenta</button>
+  <button class="btn" id="btnCobrarMesa">Cobrar</button>
 </div>
 
 <!-- Navegación -->
@@ -912,6 +949,7 @@ function costoItem(it){
 }
 const margenTxt = (precio, costo) => costo == null || !precio ? 'sin costo' : 'margen ' + Math.round((precio - costo) / precio * 100) + '%';
 const varTxt = it => it.variante || (it.oz != null ? it.oz + ' oz' : '');
+const nombreItem = it => { const v = varTxt(it); return esc(it.nombre) + (v && v !== 'Unidad' ? ' · ' + esc(v) : ''); };
 const tamLabel = t => t.oz + ' oz' + (t.nombre ? ' · ' + t.nombre : '');
 const ICON_TRASH = '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
 const ICON_LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
@@ -923,7 +961,7 @@ function toast(msg){
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), Math.max(1800, msg.length * 55));
 }
 function openSheet(html){ $('#sheet').innerHTML = html; $('#sheetBg').classList.add('show'); }
-function closeSheet(){ $('#sheetBg').classList.remove('show'); $('#sheet').onclick = null; }
+function closeSheet(){ $('#sheetBg').classList.remove('show'); $('#sheet').onclick = null; S._cuentaSheet = false; }
 $('#sheetBg').addEventListener('click', e => { if (e.target.id === 'sheetBg') closeSheet(); });
 
 // Confirmación propia, funciona dentro de cualquier vista (reemplaza a confirm())
@@ -951,11 +989,12 @@ function segLineas(id, actual, opts = {}){
 /* ================= NAVEGACIÓN ================= */
 let vista = 'mesas';
 function irA(v){
+  if (vista === 'mesa' && v !== 'mesa' && S.mesaAbierta){ guardarMesaYa(S.mesaAbierta); S.mesaAbierta = null; }
   vista = v;
-  const tab = ['fin', 'hist', 'prods'].includes(v) ? 'mas' : v;
+  const tab = ['fin', 'hist', 'prods'].includes(v) ? 'mas' : v === 'mesa' ? 'mesas' : v;
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x.dataset.view === tab));
   document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'v-' + v));
-  document.body.classList.toggle('vista-mesas', v === 'mesas');
+  document.body.classList.toggle('vista-mesas', v === 'mesas' || v === 'mesa');
   window.scrollTo(0, 0);
   render();
 }
@@ -977,6 +1016,7 @@ function render(){
   renderHoy();
   renderOrderbar();
   if (vista === 'mesas') renderMesas();
+  if (vista === 'mesa') renderMesaView();
   if (vista === 'caja') renderCaja();
   if (vista === 'stats') renderStats();
   if (vista === 'cierre') renderCierre();
@@ -1061,16 +1101,16 @@ function agregar(pid, vid){
   renderCaja(); renderOrderbar();
   return st && st.n <= 0;
 }
-function elegirVariante(pid){
+function elegirVariante(pid, alAgregar = agregar, cantDe = (a, b) => S.pedido[a + '|' + b] || 0){
   const p = S.productos.find(x => x.id === pid); if (!p) return;
   const vs = variantesDe(p), porTam = esPorTamano(p.linea);
   if (!vs.length) return toast(porTam ? 'Agrega tamaños de ' + nombreLinea(p.linea).toLowerCase() + ' en Productos' : 'Ponle precio a ' + p.nombre + ' en Productos');
-  if (vs.length === 1){ const sin = agregar(pid, vs[0].id); toast(sin ? 'Ojo: ' + p.nombre + ' aparece agotado en inventario' : '+1 ' + p.nombre); return; }
+  if (vs.length === 1){ const sin = alAgregar(pid, vs[0].id); toast(sin ? 'Ojo: ' + p.nombre + ' aparece agotado en inventario' : '+1 ' + p.nombre); return; }
   openSheet(`
     <h3>${esc(p.nombre)}</h3>
     <p class="sub">${esc(unoDe(p.linea))} · elige ${porTam ? 'el tamaño' : 'la presentación'}</p>
     <div class="tam-grid">${vs.map(v => {
-      const q = S.pedido[pid + '|' + v.id] || 0, st = stockTxt(v.id);
+      const q = cantDe(pid, v.id), st = stockTxt(v.id);
       return `<button class="tam-btn" data-t="${v.id}">
         ${q ? `<span class="q">${q}</span>` : ''}
         <div class="o ${porTam ? '' : 'txt'}">${esc(v.grande)}${v.unidad ? `<small>${v.unidad}</small>` : ''}</div>
@@ -1082,7 +1122,7 @@ function elegirVariante(pid){
   $('#sheet').onclick = e => {
     const b = e.target.closest('[data-t]'); if (!b) return;
     const v = vs.find(x => x.id === b.dataset.t);
-    const sin = agregar(pid, b.dataset.t); closeSheet();
+    const sin = alAgregar(pid, b.dataset.t); closeSheet();
     toast(sin ? 'Ojo: ' + p.nombre + ' ' + v.etiqueta + ' aparece agotado en inventario' : '+1 ' + p.nombre + ' ' + v.etiqueta);
   };
 }
@@ -1096,6 +1136,7 @@ function pedidoItems(){
   }).filter(Boolean);
 }
 function renderOrderbar(){
+  if (vista !== 'mesa'){ $('#cuentaBar').classList.remove('show'); }
   const items = pedidoItems();
   const n = items.reduce((a, it) => a + it.cantidad, 0);
   const show = n > 0 && vista === 'caja';
@@ -1205,8 +1246,12 @@ async function abrirCaja(baseTxt, nombre){
    =================================================================== */
 const ICON_PERS = '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5a3 3 0 0 1 0 6M18 14.5c2 .7 3 2.8 3 5.5"/></svg>';
 const MESA_W = 150, MESA_H = 96, CELDA = 20;
-const totalMesa = m => (m.items || []).reduce((a, it) => a + it.precio * it.cantidad, 0);
-const ocupada = m => (m.items || []).length > 0;
+// Productos de la mesa: lo guardado + lo que se acaba de tocar y todavía se está guardando
+const pendMesa = {}, tFlush = {}, guardandoMesa = {};
+const itemsMesa = m => pendMesa[m.id] ? juntarItems(copia(m.items || []), pendMesa[m.id]) : (m.items || []);
+const totalMesa = m => itemsMesa(m).reduce((a, it) => a + it.precio * it.cantidad, 0);
+const ocupada = m => itemsMesa(m).length > 0;
+const hayPendientes = () => Object.keys(pendMesa).length > 0 || Object.values(guardandoMesa).some(Boolean);
 const mesasOrden = () => [...S.mesas].sort((a, b) => (a.orden || 0) - (b.orden || 0) || a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
 const hace = iso => { if (!iso) return ''; const min = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
   return min < 1 ? 'hace un momento' : min < 60 ? 'hace ' + min + ' min' : 'hace ' + Math.floor(min / 60) + ' h ' + (min % 60) + ' min'; };
@@ -1262,7 +1307,7 @@ $('#mesasBody').addEventListener('click', e => {
   const b = e.target.closest('[data-m]'); if (b) return accionMesas(b.dataset.m);
   const m = e.target.closest('[data-mesa]'); if (!m || S.editPlano) return;
   if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
-  abrirMesa(m.dataset.mesa);
+  entrarMesa(m.dataset.mesa);
 });
 async function accionMesas(a){
   if (a === 'plano' || a === 'lista'){ S.vistaMesas = a; Almacen.set('fi_vista_mesas', a); return renderMesas(); }
@@ -1351,53 +1396,155 @@ function elegirMesa(titulo, alElegir, excluir){
   $('#sheet').onclick = e => { const b = e.target.closest('[data-pick]'); if (b) alElegir(b.dataset.pick); };
 }
 
-function abrirMesa(id){
-  const m = S.mesas.find(x => x.id === id); if (!m) return;
-  const items = m.items || [], oc = items.length > 0;
-  openSheet(`
-    <h3>${esc(m.nombre)}</h3>
-    <p class="sub">${oc ? 'Cuenta abierta ' + hace(m.abiertaEn) : 'Mesa libre'} · ${m.sillas} sillas</p>
-    <div class="kv" style="align-items:center"><span>Personas</span>
-      <div class="stepper"><button class="icon-btn" data-per="-1" aria-label="Menos">−</button><b>${m.personas || 0}</b><button class="icon-btn" data-per="1" aria-label="Más">+</button></div></div>
+/* ---------- Pantalla de una mesa: productos a la izquierda, cuenta a la derecha ---------- */
+function entrarMesa(id){
+  if (!S.mesas.some(m => m.id === id)) return;
+  S.mesaAbierta = id;
+  if (!LINEAS[S.linea] || LINEAS[S.linea].activo === false) S.linea = lineasActivas()[0]?.id || '';
+  irA('mesa');
+}
+const cantEnMesa = (m, pid, vid) => itemsMesa(m).filter(it => it.productoId === pid && (vid == null || String(it.tamanoId) === String(vid))).reduce((a, it) => a + it.cantidad, 0);
+
+function renderMesaView(){
+  const m = S.mesas.find(x => x.id === S.mesaAbierta);
+  if (!m){ S.mesaAbierta = null; return irA('mesas'); }
+  const oc = ocupada(m);
+  $('#mesaTop').innerHTML = (!S.caja ? bannerCaja('cobrar o agregar productos') : '') + `
+    <div class="mesa-top">
+      <button class="icon-btn" data-ma="volver" aria-label="Volver a las mesas">‹</button>
+      <div><h2>${esc(m.nombre)}</h2><small>${oc ? 'Abierta ' + hace(m.abiertaEn) : 'Libre · toca un producto'}</small></div>
+      <div class="stepper" title="Personas">${ICON_PERS.replace('<svg', '<svg style="width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2"')}
+        <button class="icon-btn" data-per="-1" aria-label="Menos personas">−</button><b>${m.personas || 0}</b><button class="icon-btn" data-per="1" aria-label="Más personas">+</button></div>
+    </div>`;
+  segLineas('#lineaMesa', S.linea);
+  const lista = S.productos.filter(p => p.activo && p.linea === S.linea);
+  $('#mesaGrid').classList.toggle('bloqueado', !S.caja);
+  $('#mesaGrid').innerHTML = lista.length ? lista.map(p => {
+    const vs = variantesDe(p);
+    const precioTxt = !vs.length ? 'Sin precio' : vs.length === 1 ? fmt(vs[0].precio) + (esPorTamano(p.linea) ? ' · ' + vs[0].etiqueta : '') : 'Desde ' + fmt(Math.min(...vs.map(v => v.precio)));
+    const q = cantEnMesa(m, p.id), st = !esPorTamano(p.linea) && vs.length === 1 ? stockTxt(vs[0].id) : null;
+    return `<button class="prod" style="--c:${p.color}" data-padd="${p.id}">
+      ${q ? `<span class="q">${q}</span>` : ''}
+      <div class="cat">${esc(unoDe(p.linea))}</div>
+      <div class="n">${esc(p.nombre)}</div>
+      <div class="p">${precioTxt}</div>
+      ${st ? `<span class="stock ${st.cls}">${st.n <= 0 ? 'Agotado' : 'Quedan ' + st.n}</span>` : ''}
+    </button>`;
+  }).join('') : '<div class="empty" style="grid-column:1/-1">No hay productos en esta categoría.</div>';
+  $('#mesaCuenta').innerHTML = cuentaHtml(m);
+  if (S._cuentaSheet && $('#sheetBg').classList.contains('show')) $('#sheet').innerHTML = '<h3>Cuenta de ' + esc(m.nombre) + '</h3>' + cuentaHtml(m, true);
+  // Barra inferior en el celular
+  const n = itemsMesa(m).reduce((a, it) => a + it.cantidad, 0);
+  $('#cuentaBar').classList.add('show');
+  document.body.classList.add('con-pedido');
+  $('#cbCount').textContent = n ? 'Cuenta · ' + n + (n === 1 ? ' producto' : ' productos') : 'Cuenta vacía';
+  $('#cbTotal').textContent = fmt(totalMesa(m));
+  $('#btnCobrarMesa').disabled = !n;
+}
+function cuentaHtml(m, enSheet){
+  const items = itemsMesa(m), oc = items.length > 0;
+  return `${enSheet ? '' : `<h3>Cuenta</h3><p class="sub">${m.sillas} sillas · ${m.personas || 0} ${m.personas === 1 ? 'persona' : 'personas'}</p>`}
     ${oc ? items.map(it => { const k = it.productoId + '|' + it.tamanoId; return `
       <div class="line">
-        <div class="nm">${esc(it.nombre)} · ${esc(varTxt(it))}<small>${esc(unoDe(it.linea))} · ${fmt(it.precio)}</small></div>
+        <div class="nm">${nombreItem(it)}<small>${esc(unoDe(it.linea))} · ${fmt(it.precio)}</small></div>
         <div class="qty">
           <button class="icon-btn" data-mq="${k}" data-d="-1" aria-label="Menos">−</button>
           <b>${it.cantidad}</b>
           <button class="icon-btn" data-mq="${k}" data-d="1" aria-label="Más">+</button>
         </div>
         <div class="st">${fmt(it.precio * it.cantidad)}</div>
-      </div>`; }).join('') + `<div class="total-row"><span>Total</span><span>${fmt(totalMesa(m))}</span></div>`
-      : '<div class="empty" style="padding:18px 8px">Sin productos todavía.</div>'}
-    <button class="btn ${oc ? 'ghost' : ''} block" id="mAgregar" style="margin-top:6px">+ Agregar productos</button>
-    ${oc ? `<button class="btn block" id="mCobrar" style="margin-top:10px">Cobrar ${fmt(totalMesa(m))}</button>
-    <div class="row2"><button class="btn ghost" id="mMover">Mover / juntar</button><button class="btn danger" id="mLiberar">Liberar mesa</button></div>` : ''}`);
-  $('#sheet').onclick = async e => {
-    const per = e.target.closest('[data-per]');
-    if (per){ const r = await actualizarMesa(id, x => { x.personas = Math.max(0, (x.personas || 0) + Number(per.dataset.per)); }); if (r) abrirMesa(id); return; }
-    const q = e.target.closest('[data-mq]');
-    if (q){
-      const [pid, vid] = q.dataset.mq.split('|'), d = Number(q.dataset.d);
-      const r = await actualizarMesa(id, x => {
-        const it = (x.items || []).find(i => i.productoId === pid && String(i.tamanoId) === vid); if (!it) return;
-        it.cantidad += d;
-        x.items = x.items.filter(i => i.cantidad > 0);
-        if (!x.items.length) limpiarMesa(x);
-      });
-      if (r) abrirMesa(id); return;
-    }
-    if (e.target.id === 'mAgregar'){ S.modoMesa = id; S.pedido = {}; closeSheet(); irA('caja'); return; }
-    if (e.target.id === 'mCobrar') return cobrarMesa(id);
-    if (e.target.id === 'mMover') return elegirMesa('Mover ' + m.nombre + ' a…', destino => moverMesa(id, destino), id);
-    if (e.target.id === 'mLiberar'){
-      if (!await confirmar(`¿Liberar ${m.nombre}? Se borra la cuenta de ${fmt(totalMesa(m))} sin cobrarla.`, 'Liberar')) return;
-      closeSheet();
-      if (await actualizarMesa(id, limpiarMesa)) toast(m.nombre + ' liberada');
-    }
-  };
+      </div>`; }).join('') + `<div class="total-row"><span>Total</span><span>${fmt(totalMesa(m))}</span></div>
+      <button class="btn block" data-ma="cobrar">Cobrar ${fmt(totalMesa(m))}</button>
+      <div class="row2" style="margin-top:10px"><button class="btn ghost" data-ma="mover">Mover / juntar</button><button class="btn danger" data-ma="liberar">Liberar</button></div>`
+    : '<div class="empty" style="padding:18px 8px">Sin productos todavía.<br>Toca los productos para agregarlos a la cuenta.</div>'}`;
 }
+
+// Tocar un producto lo suma a la cuenta de una vez. Se guarda en la nube un instante después
+// (si tocan varios seguidos, se guardan juntos).
+function sumarAMesa(id, pid, vid){
+  const m = S.mesas.find(x => x.id === id), p = S.productos.find(x => x.id === pid);
+  const v = variantesDe(p).find(x => x.id === vid);
+  if (!m || !p || !v) return false;
+  const st = stockTxt(vid);
+  const item = { productoId: pid, nombre: p.nombre, linea: p.linea, tamanoId: vid, oz: v.oz, variante: v.etiqueta, precio: v.precio, costo: v.costo ?? null, cantidad: 1 };
+  pendMesa[id] = juntarItems(pendMesa[id] || [], [item]);
+  if (navigator.vibrate) navigator.vibrate(15);
+  _stock = null; renderMesaView();
+  clearTimeout(tFlush[id]); tFlush[id] = setTimeout(() => guardarMesaYa(id), 700);
+  return st && st.n <= 0;
+}
+async function guardarMesaYa(id){
+  clearTimeout(tFlush[id]);
+  while (guardandoMesa[id]) await new Promise(r => setTimeout(r, 120));
+  const lote = pendMesa[id];
+  if (!lote || !lote.length){ delete pendMesa[id]; return true; }
+  delete pendMesa[id];
+  guardandoMesa[id] = true;
+  let ok = false;
+  try {
+    ok = !!await actualizarMesa(id, x => {
+      x.items = juntarItems(x.items || [], lote);
+      if (!x.abiertaEn) x.abiertaEn = new Date().toISOString();
+      if (!x.personas) x.personas = 1;
+    });
+  } finally { guardandoMesa[id] = false; }
+  if (!ok) toast('No se guardaron los últimos productos de la mesa. Revisa la conexión');
+  return ok;
+}
+
+$('#lineaMesa').addEventListener('click', e => {
+  const b = e.target.closest('[data-l]'); if (!b) return;
+  S.linea = b.dataset.l; renderMesaView();
+});
+$('#mesaGrid').addEventListener('click', e => {
+  const b = e.target.closest('[data-padd]'); if (!b) return;
+  if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
+  const id = S.mesaAbierta, m = S.mesas.find(x => x.id === id); if (!m) return;
+  const p = S.productos.find(x => x.id === b.dataset.padd);
+  elegirVariante(b.dataset.padd, (pid, vid) => sumarAMesa(id, pid, vid), (pid, vid) => cantEnMesa(m, pid, vid));
+});
+// Acciones de la cuenta (panel de la derecha, hoja del celular y encabezado)
+async function accionCuenta(e){
+  const id = S.mesaAbierta, m = S.mesas.find(x => x.id === id); if (!m) return;
+  const per = e.target.closest('[data-per]');
+  if (per){ await guardarMesaYa(id); await actualizarMesa(id, x => { x.personas = Math.max(0, (x.personas || 0) + Number(per.dataset.per)); }); return; }
+  const q = e.target.closest('[data-mq]');
+  if (q){
+    const [pid, vid] = q.dataset.mq.split('|'), d = Number(q.dataset.d);
+    if (d > 0) return sumarAMesa(id, pid, vid);
+    await guardarMesaYa(id);
+    await actualizarMesa(id, x => {
+      const it = (x.items || []).find(i => i.productoId === pid && String(i.tamanoId) === vid); if (!it) return;
+      it.cantidad += d;
+      x.items = x.items.filter(i => i.cantidad > 0);
+      if (!x.items.length) limpiarMesa(x);
+    });
+    return;
+  }
+  const a = e.target.closest('[data-ma]'); if (!a) return;
+  if (a.dataset.ma === 'volver') return irA('mesas');
+  await guardarMesaYa(id);
+  if (a.dataset.ma === 'cobrar') return cobrarMesa(id);
+  if (a.dataset.ma === 'mover') return elegirMesa('Mover ' + m.nombre + ' a…', destino => moverMesa(id, destino), id);
+  if (a.dataset.ma === 'liberar'){
+    if (!await confirmar(`¿Liberar ${m.nombre}? Se borra la cuenta de ${fmt(totalMesa(m))} sin cobrarla.`, 'Liberar')) return;
+    closeSheet();
+    if (await actualizarMesa(id, limpiarMesa)){ toast(m.nombre + ' liberada'); irA('mesas'); }
+  }
+}
+$('#mesaTop').addEventListener('click', accionCuenta);
+$('#mesaCuenta').addEventListener('click', accionCuenta);
+$('#btnVerCuenta').addEventListener('click', () => {
+  const m = S.mesas.find(x => x.id === S.mesaAbierta); if (!m) return;
+  openSheet('<h3>Cuenta de ' + esc(m.nombre) + '</h3>' + cuentaHtml(m, true));
+  S._cuentaSheet = true;
+  $('#sheet').onclick = accionCuenta;
+});
+$('#btnCobrarMesa').addEventListener('click', async () => { const id = S.mesaAbierta; if (!id) return; await guardarMesaYa(id); cobrarMesa(id); });
+window.addEventListener('beforeunload', e => { if (hayPendientes()){ Object.keys(pendMesa).forEach(guardarMesaYa); e.preventDefault(); e.returnValue = ''; } });
+
 async function moverMesa(origen, destino){
+  await guardarMesaYa(origen);
   const a = await refrescarMesa(origen), b = await refrescarMesa(destino);
   if (!a || !b) return toast('No se encontró la mesa');
   if (ocupada(b) && !await confirmar(`${b.nombre} ya tiene cuenta abierta. ¿Juntar las dos cuentas en ${b.nombre}?`, 'Juntar', false)) return;
@@ -1406,11 +1553,13 @@ async function moverMesa(origen, destino){
   b.abiertaEn = [a.abiertaEn, b.abiertaEn].filter(Boolean).sort()[0] || new Date().toISOString();
   limpiarMesa(a);
   a.actualizado = b.actualizado = new Date().toISOString();
-  closeSheet(); render();
+  closeSheet();
+  if (vista === 'mesa') irA('mesas'); else render();
   if (await guardar(Promise.all([DB.upsertMesa(b), DB.upsertMesa(a)]))) toast('Cuenta pasada a ' + b.nombre);
 }
 function cobrarMesa(id, metodo = 'Efectivo'){
   const m = S.mesas.find(x => x.id === id); if (!m) return;
+  if (!ocupada(m)) return toast('La cuenta está vacía');
   openSheet(`
     <h3>Cobrar ${esc(m.nombre)}</h3>
     <p class="sub">${(m.items || []).reduce((a, it) => a + it.cantidad, 0)} productos · ${m.personas || 0} personas</p>
@@ -1422,7 +1571,7 @@ function cobrarMesa(id, metodo = 'Efectivo'){
     <button class="btn ghost block" id="mVolver" style="margin-top:8px">Volver a la mesa</button>`);
   $('#sheet').onclick = async e => {
     const c = e.target.closest('[data-m]'); if (c) return cobrarMesa(id, c.dataset.m);
-    if (e.target.id === 'mVolver') return abrirMesa(id);
+    if (e.target.id === 'mVolver') return closeSheet();
     if (e.target.id !== 'mConfirmar') return;
     if (!S.caja){ closeSheet(); toast('Primero abre la caja'); return abrirCajaSheet(); }
     e.target.disabled = true;
@@ -1433,6 +1582,7 @@ function cobrarMesa(id, metodo = 'Efectivo'){
     const { venta, enNube } = await crearVenta(f.items, metodo, { mesa: f.nombre });
     closeSheet();
     await actualizarMesa(id, limpiarMesa);
+    if (vista === 'mesa') irA('mesas');
     toast(enNube === false ? 'Sin internet: venta guardada en el celular' : f.nombre + ' cobrada · ' + fmt(venta.total));
   };
 }
@@ -1511,7 +1661,7 @@ function calcStock(){
     else x.stock -= mv.cantidad;
   });
   S.ventas.forEach(v => v.items.forEach(it => { const x = m[it.tamanoId]; if (x && v.fecha > x.t0) x.stock -= it.cantidad; }));
-  S.mesas.forEach(me => (me.items || []).forEach(it => { const x = m[it.tamanoId]; if (x) x.stock -= it.cantidad; }));
+  S.mesas.forEach(me => itemsMesa(me).forEach(it => { const x = m[it.tamanoId]; if (x) x.stock -= it.cantidad; }));
   return m;
 }
 const stockDe = id => { if (!_stock) _stock = calcStock(); return _stock[id] ? Math.round(_stock[id].stock * 100) / 100 : null; };
@@ -3089,9 +3239,10 @@ setInterval(async () => {
     const [mesas, caja] = await Promise.all([DB.cargarMesas(), DB.estadoCaja()]);
     const cambioCaja = (caja ? caja.id : null) !== (S.caja && !S.caja.virtual ? S.caja.id : null) && !(S.caja && S.caja.virtual && !caja);
     if (cambioCaja) return recargar();
+    if (hayPendientes()) return;
     if (JSON.stringify(mesas) !== JSON.stringify(S.mesas)){
       S.mesas = mesas; _stock = null;
-      if (vista === 'mesas' || vista === 'inv') render();
+      if (vista === 'mesas' || vista === 'mesa' || vista === 'inv') render();
     }
   } catch(e){ console.warn('Actualizar mesas:', e); }
 }, 15000);
