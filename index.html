@@ -108,6 +108,11 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
   .pres-row{display:grid;grid-template-columns:1fr 86px 80px 40px;gap:6px;margin-bottom:8px;align-items:center}
   .pres-row .in{padding:11px 9px}
   .pres-h{margin-bottom:2px;font-size:12px;font-weight:800;color:var(--muted)}
+  .pres-row.inv{grid-template-columns:minmax(0,1fr) 78px 78px 50px 34px;gap:5px}
+  .pres-row.inv .in{padding:10px 6px;font-size:15px;min-width:0}
+  .pres-row.inv .icon-btn{width:34px}
+  .pres-row.inv input[type=number]{-moz-appearance:textfield}
+  .pres-row.inv input::-webkit-outer-spin-button,.pres-row.inv input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .tam-btn .o.txt{font-size:20px;line-height:1.15;word-break:break-word}
   .opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-weight:700;font-size:14px}
   .opt input{margin-top:3px;width:18px;height:18px;flex:none}
@@ -1671,12 +1676,12 @@ function renderInv(){
   const vars = variantesInventario(), porId = Object.fromEntries(vars.map(v => [v.id, v]));
   const items = S.inventario.filter(x => porId[x.id]).map(x => ({ ...x, v: porId[x.id], stock: stockDe(x.id) }));
   const agot = items.filter(x => x.stock <= 0), bajos = items.filter(x => x.stock > 0 && x.stock <= x.minimo);
-  $('#invTop').innerHTML = `<div class="mesas-bar"><h2>Inventario</h2><button class="btn sm" data-iv="config">Configurar</button></div>`;
+  $('#invTop').innerHTML = `<div class="mesas-bar"><h2>Inventario</h2><button class="btn sm" data-iv="nuevo">+ Producto</button><button class="btn sm ghost" data-iv="config">Configurar</button></div>`;
   if (necesitaV4()){ $('#invBody').innerHTML = '<div class="empty">Para usar el inventario falta actualizar la base de datos (mira el aviso de arriba).</div>'; return; }
   if (!items.length){
     $('#invBody').innerHTML = `<div class="card"><div class="empty" style="padding:18px 8px">Todavía no estás controlando ningún producto.<br>
       Elige qué productos contar (cervezas, licores, agua, vasos…), escribe cuánto hay y la app los descuenta sola con cada venta.<br><br>
-      <button class="btn" data-iv="config">Configurar inventario</button></div></div>`;
+      <button class="btn" data-iv="nuevo">+ Agregar producto</button> <button class="btn ghost" data-iv="config">Elegir productos existentes</button></div></div>`;
     return;
   }
   const fila = x => { const cls = x.stock <= 0 ? 'out' : x.stock <= x.minimo ? 'low' : '';
@@ -1705,9 +1710,10 @@ function movHtml(mv, porId){
     <div class="q" style="color:${mv.tipo === 'entrada' ? 'var(--libre)' : mv.tipo === 'merma' ? 'var(--danger)' : 'var(--ink)'}">${signo}${mv.cantidad}</div>
     <button class="del-x" data-movdel="${mv.id}" aria-label="Borrar movimiento">✕</button></div>`;
 }
-$('#invTop').addEventListener('click', e => { if (e.target.closest('[data-iv]')) configurarInv(); });
+const accionInv = b => b.dataset.iv === 'nuevo' ? nuevoProductoInv() : configurarInv();
+$('#invTop').addEventListener('click', e => { const b = e.target.closest('[data-iv]'); if (b) accionInv(b); });
 $('#invBody').addEventListener('click', e => {
-  if (e.target.closest('[data-iv]')) return configurarInv();
+  const iv = e.target.closest('[data-iv]'); if (iv) return accionInv(iv);
   const d = e.target.closest('[data-movdel]'); if (d) return borrarMov(d.dataset.movdel);
   const r = e.target.closest('[data-inv]'); if (r) itemInv(r.dataset.inv);
 });
@@ -1743,7 +1749,8 @@ function itemInv(id, tipo = 'entrada'){
     <label class="f" style="margin-top:18px">Avisar cuando queden (mínimo)</label>
     <div style="display:flex;gap:8px"><input class="in" id="ivMin" type="number" inputmode="numeric" min="0" value="${cfg.minimo}"><button class="btn ghost" id="ivMinOk">Guardar</button></div>
     ${movs.length ? `<label class="f">Últimos movimientos</label>${movs.map(mv => movHtml(mv, { [id]: v })).join('')}` : ''}
-    <button class="btn danger block" id="ivQuitar" style="margin-top:16px">Dejar de controlar este producto</button>`);
+    ${v.productoId ? '<button class="btn ghost block" id="ivEditar" style="margin-top:16px">Editar nombre, precios y costos</button>' : ''}
+    <button class="btn danger block" id="ivQuitar" style="margin-top:10px">Dejar de controlar este producto</button>`);
   $('#sheet').onclick = async e => {
     const t = e.target.closest('[data-tipo]'); if (t) return itemInv(id, t.dataset.tipo);
     const md = e.target.closest('[data-md]');
@@ -1753,6 +1760,7 @@ function itemInv(id, tipo = 'entrada'){
       const mn = Math.max(0, Number($('#ivMin').value) || 0); cfg.minimo = mn;
       render(); if (await guardar(DB.upsertInv(cfg))) toast('Mínimo guardado'); return itemInv(id, tipo);
     }
+    if (e.target.id === 'ivEditar'){ S.lineaProd = v.linea; return editarProducto(v.productoId); }
     if (e.target.id === 'ivQuitar'){
       if (!await confirmar(`¿Dejar de controlar ${v.nombre}? Se conserva su historial por si lo vuelves a activar.`, 'Dejar de controlar')) return;
       S.inventario = S.inventario.filter(x => x.id !== id);
@@ -1774,6 +1782,74 @@ function itemInv(id, tipo = 'entrada'){
     S.movs.push(mov); tareas.push(DB.addMov(mov));
     closeSheet(); render();
     if (await guardar(Promise.all(tareas))) toast(TIPOS_MOV[tipo] + ' guardada · quedan ' + stockDe(id));
+  };
+}
+// Crear un producto nuevo desde Inventario: nombre, presentaciones con precio, costo y cuánto hay
+function filaInvProd(x = {}){
+  return `<div class="pres-row inv" data-pid="${x.id || uid()}">
+    <input class="in" data-pn value="${esc(x.nombre || '')}" placeholder="Unidad" maxlength="20">
+    <input class="in" data-pp type="number" inputmode="numeric" min="0" step="500" value="${x.precio ?? ''}" placeholder="Precio">
+    <input class="in" data-pc type="number" inputmode="numeric" min="0" step="100" value="${x.costo ?? ''}" placeholder="Costo">
+    <input class="in" data-ph type="number" inputmode="numeric" min="0" step="1" value="${x.hay ?? ''}" placeholder="Hay">
+    <button class="icon-btn del" data-prdel aria-label="Quitar">✕</button>
+  </div>`;
+}
+function nuevoProductoInv(){
+  if (necesitaV4()) return toast('Falta actualizar la base de datos (ver aviso)');
+  const cats = lineasOrden().filter(l => !esPorTamano(l.id));
+  if (!cats.length) return toast('Crea primero una categoría de precio por producto en Más → Productos');
+  let color = COLORES[S.productos.length % COLORES.length];
+  openSheet(`
+    <h3>Agregar producto al inventario</h3>
+    <p class="sub">Queda creado para vender (en Vender y en las mesas) y se controla su inventario.</p>
+    <label class="f">Nombre</label>
+    <input class="in" id="npNombre" placeholder="Ej: Pilsen, Aguardiente Antioqueño, Gaseosa" maxlength="30">
+    <label class="f">Categoría</label>
+    <select class="in" id="npLinea">${cats.map(l => `<option value="${l.id}">${esc(l.nombre)}</option>`).join('')}</select>
+    <label class="f">Presentaciones</label>
+    <p class="sub" style="margin:0 0 8px">Si se vende de una sola forma deja una fila ("Unidad"). Precio de venta, lo que te cuesta a ti y cuántas hay ahora.</p>
+    <div class="pres-row inv pres-h"><span>Presentación</span><span>Precio</span><span>Costo</span><span>Hay</span><span></span></div>
+    <div id="npPres">${filaInvProd({ nombre: 'Unidad' })}</div>
+    <button class="btn sm ghost" id="npAddPres">+ Presentación</button>
+    <label class="f">Avisar cuando queden (mínimo)</label>
+    <input class="in" id="npMin" type="number" inputmode="numeric" min="0" value="5">
+    <label class="f">Color</label>
+    <div class="swatches">${COLORES.map(c => `<button class="sw ${c === color ? 'on' : ''}" style="--c:${c}" data-c="${c}" aria-label="Color"></button>`).join('')}</div>
+    <div class="row2"><button class="btn ghost" id="npCancel">Cancelar</button><button class="btn" id="npSave">Guardar producto</button></div>`);
+  $('#npNombre').focus();
+  $('#sheet').onclick = async e => {
+    const sw = e.target.closest('[data-c]');
+    if (sw){ color = sw.dataset.c; document.querySelectorAll('#sheet .sw').forEach(x => x.classList.toggle('on', x === sw)); return; }
+    if (e.target.id === 'npAddPres'){ $('#npPres').insertAdjacentHTML('beforeend', filaInvProd()); $('#npPres .pres-row:last-child [data-pn]').focus(); return; }
+    if (e.target.closest('[data-prdel]')){
+      if (document.querySelectorAll('#npPres .pres-row').length <= 1) return toast('Debe quedar al menos una presentación');
+      e.target.closest('.pres-row').remove(); return;
+    }
+    if (e.target.id === 'npCancel') return closeSheet();
+    if (e.target.id !== 'npSave') return;
+    const nombre = $('#npNombre').value.trim(), linea = $('#npLinea').value;
+    if (!nombre) return toast('Escribe el nombre');
+    if (S.productos.some(x => x.linea === linea && x.nombre.toLowerCase() === nombre.toLowerCase())) return toast('Ese producto ya existe en ' + nombreLinea(linea).toLowerCase() + '. Contrólalo desde Configurar');
+    const filas = [...document.querySelectorAll('#npPres .pres-row')].map(r => {
+      const v = sel => r.querySelector(sel).value.trim();
+      return { id: r.dataset.pid, nombre: v('[data-pn]') || 'Unidad', precio: Math.round(Number(v('[data-pp]'))),
+        costo: v('[data-pc]') === '' ? null : Math.round(Number(v('[data-pc]'))), hay: v('[data-ph]') === '' ? null : Number(v('[data-ph]')) };
+    });
+    if (filas.some(x => !(x.precio > 0))) return toast('Ponle precio a cada presentación');
+    if (new Set(filas.map(x => x.nombre.toLowerCase())).size !== filas.length) return toast('Hay presentaciones repetidas');
+    if (filas.some(x => x.hay !== null && !(x.hay >= 0))) return toast('Revisa las cantidades');
+    const minimo = Math.max(0, Number($('#npMin').value) || 0), ahora = new Date().toISOString();
+    const prod = { id: uid(), nombre, linea, color, activo: true, presentaciones: filas.map(({ hay, ...x }) => x) };
+    const tareas = [];
+    S.productos.push(prod); tareas.push(DB.upsertProducto(prod));
+    filas.forEach(x => {
+      const cfg = { id: x.id, productoId: prod.id, minimo, activo: true };
+      S.inventario.push(cfg); tareas.push(DB.upsertInv(cfg));
+      const mov = { id: uid(), varianteId: x.id, tipo: 'conteo', cantidad: x.hay ?? 0, fecha: ahora, nota: 'Producto nuevo', gastoId: null };
+      S.movs.push(mov); tareas.push(DB.addMov(mov));
+    });
+    closeSheet(); render();
+    if (await guardar(Promise.all(tareas))) toast(nombre + ' agregado al inventario');
   };
 }
 function configurarInv(){
