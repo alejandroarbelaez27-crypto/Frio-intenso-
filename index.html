@@ -321,6 +321,95 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     .solo-print{display:block}
     main{max-width:none;padding:0}
   }
+  /* ===== Estado de caja ===== */
+  :root{--libre:#2f9e44;--ocup:#e8590c}
+  @media (prefers-color-scheme: dark){ :root{--libre:#69db7c;--ocup:#ffa94d} }
+  .hoy-pill{border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:12px;padding:6px 10px;font:inherit;font-size:11px;font-weight:700}
+  .btn.ok{background:var(--libre);color:#fff}
+  @media (prefers-color-scheme: dark){ .btn.ok{color:#05210d} }
+  .alerta-caja{display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--ocup) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--ocup) 45%,transparent);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .alerta-caja svg{width:28px;height:28px;flex:none;fill:none;stroke:var(--ocup);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .alerta-caja div{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--muted)}
+  .alerta-caja b{display:block;font-size:15px;color:var(--ink);font-weight:800}
+  .bloqueado{opacity:.45;filter:grayscale(.5)}
+  .caja-h{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+  .caja-h svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .caja-h .estado{margin-left:auto}
+  .det{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+  .det small{display:block;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+  .det b{font-size:16px;font-weight:800}
+  @media(max-width:480px){.det{grid-template-columns:1fr 1fr}.det div:last-child{grid-column:1/-1}}
+  .pagos{background:var(--surface2);border-radius:14px;padding:4px 14px 8px}
+  .esperado{border:2px solid var(--primary);border-radius:16px;padding:16px;text-align:center;margin:14px 0}
+  .esperado small{display:block;color:var(--muted);font-weight:700;font-size:13px}
+  .esperado b{display:block;font-size:34px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
+  .abrir-box{max-width:420px;margin:0 auto;text-align:center}
+  .abrir-box .in{text-align:center;font-size:22px}
+  .filtros{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:10px}
+  .filtros label.f{margin-top:0}
+  .filtros .in{padding:10px;font-size:14px}
+  .count-pill{font-size:12px;font-weight:800;color:var(--muted);background:var(--surface2);border-radius:999px;padding:4px 10px;text-transform:none;letter-spacing:0}
+
+  /* ===== Mesas ===== */
+  body.vista-mesas main{max-width:1200px}
+  .mesas-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .mesas-bar h2{margin:0;margin-right:auto}
+  .leyenda{display:flex;gap:14px;font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 10px}
+  .leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+  .plano-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);-webkit-overflow-scrolling:touch}
+  .plano{position:relative;transform-origin:0 0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px}
+  .mesa{position:absolute;width:150px;height:96px;border:2px solid var(--libre);border-radius:12px;background:var(--surface);padding:11px 13px;text-align:left;color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;font:inherit;user-select:none;-webkit-user-select:none}
+  .mesa .mn{display:flex;justify-content:space-between;align-items:center;gap:6px;font-weight:800;font-size:16px;line-height:1.2}
+  .mesa .mn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mesa .mn i{width:12px;height:12px;border-radius:50%;background:var(--libre);flex:none}
+  .mesa .mp{font-size:13px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .mesa .mp svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .mesa .mt{font-weight:800;font-size:16px;color:var(--ocup);font-variant-numeric:tabular-nums;margin-top:auto}
+  .mesa.ocup{border-color:var(--ocup);background:color-mix(in srgb,var(--ocup) 9%,var(--surface));height:auto;min-height:96px}
+  .mesa.ocup .mn i{background:var(--ocup)}
+  .mesa.redonda{border-radius:48px;padding-left:20px;padding-right:20px}
+  .plano.editando .mesa{border-style:dashed;cursor:grab;touch-action:none}
+  .mesa.drag{z-index:5;cursor:grabbing;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:.92}
+  .mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+  .mesas-grid .mesa{position:relative;width:auto}
+  .mesa-hint{font-size:12px;font-weight:700;color:var(--muted);margin:8px 2px 0}
+  .vend-mesa{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--ocup) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--ocup) 45%,transparent);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-weight:700;font-size:14px}
+  .vend-mesa span{flex:1}
+  .mesa-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+  .mesa-pick button{border:2px solid var(--libre);background:var(--surface2);border-radius:12px;padding:12px;text-align:left;font-weight:800;color:var(--ink)}
+  .mesa-pick button.ocup{border-color:var(--ocup)}
+  .mesa-pick small{display:block;font-weight:700;color:var(--muted);font-size:12px}
+  .stepper{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .stepper b{min-width:28px;text-align:center}
+
+  /* ===== Inventario ===== */
+  .inv-row{background:var(--surface);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;width:100%;border:none;text-align:left;color:var(--ink);font:inherit}
+  .inv-row .d{flex:1;min-width:0;font-weight:800;font-size:15px}
+  .inv-row .d small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+  .stk{text-align:right;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums;line-height:1}
+  .stk small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
+  .bdg{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;margin-left:4px;vertical-align:1px}
+  .bdg.out{background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger)}
+  .bdg.low{background:color-mix(in srgb,var(--ocup) 18%,transparent);color:var(--ocup)}
+  .stk.out{color:var(--danger)} .stk.low{color:var(--ocup)}
+  .cfg-row{display:grid;grid-template-columns:24px 1fr 72px 72px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .cfg-row input[type=checkbox]{width:20px;height:20px}
+  .cfg-row .in{padding:9px 8px;font-size:15px;text-align:center}
+  .cfg-row .nm{font-weight:700;font-size:14px;min-width:0}
+  .cfg-row .nm small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+  .cfg-h{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;border-bottom:none;padding-bottom:0}
+  .mov{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}
+  .mov .d{flex:1;min-width:0}
+  .mov .d small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+  .mov .q{font-weight:800;font-variant-numeric:tabular-nums}
+  .prod .stock{position:absolute;bottom:10px;right:10px;font-size:11px;font-weight:800;color:var(--muted)}
+  .prod .stock.low{color:var(--ocup)} .prod .stock.out{color:var(--danger)}
+  .tam-btn .stock{font-size:11px;font-weight:800;color:var(--muted);margin-top:2px}
+  .mas-menu{display:grid;gap:8px}
+  .mas-menu button{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:14px;font-weight:800;font-size:16px;color:var(--ink);text-align:left}
+  .mas-menu svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .mas-menu small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
   .toast.largo{white-space:normal;width:calc(100% - 32px);text-align:center;border-radius:16px}
   .toast{position:fixed;left:50%;top:calc(80px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:800;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:80;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -334,13 +423,20 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     <h1>Frío Intenso</h1>
     <small>Granizados y Frappé</small>
   </div>
-  <div class="hoy-pill">Hoy<b id="hoyTotal">$0</b></div>
+  <button class="hoy-pill" id="hoyPill">Hoy<b id="hoyTotal">$0</b></button>
 </header>
 
 <main>
   <div id="netBanner"></div>
-  <!-- ===================== CAJA ===================== -->
-  <section class="view active" id="v-caja">
+  <!-- ===================== MESAS ===================== -->
+  <section class="view active" id="v-mesas">
+    <div id="mesasTop"></div>
+    <div id="mesasBody"></div>
+  </section>
+
+  <!-- ===================== VENDER ===================== -->
+  <section class="view" id="v-caja">
+    <div id="vendTop"></div>
     <div class="lchips" id="lineaCaja"></div>
     <div class="grid" id="prodGrid"></div>
   </section>
@@ -369,12 +465,18 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     <div id="finBody"></div>
   </section>
 
-  <!-- ===================== CIERRE DE CAJA ===================== -->
+  <!-- ===================== CAJA (apertura y cierre) ===================== -->
   <section class="view" id="v-cierre">
-    <h2>Cierre de caja</h2>
+    <h2>Cuadre de caja</h2>
     <div id="cierreActual"></div>
-    <div id="cierreStats"></div>
     <div id="cierreLista"></div>
+    <div id="cierreStats"></div>
+  </section>
+
+  <!-- ===================== INVENTARIO ===================== -->
+  <section class="view" id="v-inv">
+    <div id="invTop"></div>
+    <div id="invBody"></div>
   </section>
 
   <!-- ===================== PRODUCTOS ===================== -->
@@ -390,17 +492,18 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 <div class="orderbar" id="orderbar">
   <button class="icon-btn" id="btnClearOrder" aria-label="Vaciar pedido">×</button>
   <div class="info"><small id="obCount">0 productos</small><b id="obTotal">$0</b></div>
+  <button class="btn ghost" id="btnAMesa">A mesa</button>
   <button class="btn" id="btnCobrar">Cobrar</button>
 </div>
 
 <!-- Navegación -->
 <nav class="tabs">
-  <button class="on" data-view="caja"><svg viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="10" rx="2"/><path d="M7 10V5h10v5M7 15h2M11 15h2M15 15h2"/></svg>Caja</button>
+  <button class="on" data-view="mesas"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="5" rx="1.5"/><path d="M6 12v8M18 12v8M9 4h6"/></svg>Mesas</button>
+  <button data-view="caja"><svg viewBox="0 0 24 24"><path d="M7 3h10l-1.5 18h-7z"/><path d="M6 8h12M12 3l2-2"/></svg>Vender</button>
+  <button data-view="cierre"><svg viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="10" rx="2"/><path d="M7 10V5h10v5M7 15h2M11 15h2M15 15h2"/></svg>Caja</button>
+  <button data-view="inv"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg>Inventario</button>
   <button data-view="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Gráficas</button>
-  <button data-view="fin"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .9-3 2.1 0 2.9 6 1.6 6 4.6 0 1.3-1.3 2.3-3 2.3-1.5 0-2.7-.6-3.2-1.7M12 6v2M12 16.5v1.5"/></svg>Finanzas</button>
-  <button data-view="cierre"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>Cierre</button>
-  <button data-view="hist"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Historial</button>
-  <button data-view="prods"><svg viewBox="0 0 24 24"><path d="M7 3h10l-1.5 18h-7z"/><path d="M6 8h12M12 3l2-2"/></svg>Productos</button>
+  <button data-view="mas"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>Más</button>
 </nav>
 
 <div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet"></div></div>
@@ -465,12 +568,25 @@ const Almacen = {
 const leerLocal = () => ({
   lineas: Almacen.get('fi_lineas', null),
   productos: Almacen.get('fi_productos', null), tamanos: Almacen.get('fi_tamanos', null),
-  ventas: Almacen.get('fi_ventas', []), cierres: Almacen.get('fi_cierres', []), gastos: Almacen.get('fi_gastos', [])
+  ventas: Almacen.get('fi_ventas', []), cierres: Almacen.get('fi_cierres', []), gastos: Almacen.get('fi_gastos', []),
+  mesas: Almacen.get('fi_mesas', []), inventario: Almacen.get('fi_inv', []), movs: Almacen.get('fi_movs', []), caja: Almacen.get('fi_caja', null)
 });
 
 const DBLocal = {
   async cargar(){ return leerLocal(); },
-  async _guardar(){ Almacen.set('fi_lineas', S.lineas); Almacen.set('fi_productos', S.productos); Almacen.set('fi_tamanos', S.tamanos); Almacen.set('fi_ventas', S.ventas); Almacen.set('fi_cierres', S.cierres); Almacen.set('fi_gastos', S.gastos); },
+  async _guardar(){ Almacen.set('fi_lineas', S.lineas); Almacen.set('fi_productos', S.productos); Almacen.set('fi_tamanos', S.tamanos); Almacen.set('fi_ventas', S.ventas); Almacen.set('fi_cierres', S.cierres); Almacen.set('fi_gastos', S.gastos);
+    Almacen.set('fi_mesas', S.mesas); Almacen.set('fi_inv', S.inventario); Almacen.set('fi_movs', S.movs); Almacen.set('fi_caja', S.caja); },
+  upsertMesa(){ return this._guardar(); },
+  deleteMesa(){ return this._guardar(); },
+  async leerMesa(id){ return S.mesas.find(m => m.id === id) || null; },
+  async cargarMesas(){ return S.mesas; },
+  async estadoCaja(){ return S.caja; },
+  upsertInv(){ return this._guardar(); },
+  deleteInv(){ return this._guardar(); },
+  addMov(){ return this._guardar(); },
+  deleteMov(){ return this._guardar(); },
+  guardarCaja(){ return this._guardar(); },
+  reabrirCierre(){ return this._guardar(); },
   upsertGasto(){ return this._guardar(); },
   deleteGasto(){ return this._guardar(); },
   upsertLinea(){ return this._guardar(); },
@@ -490,8 +606,16 @@ const DBLocal = {
 // Conversión entre el formato de la app (camelCase) y las columnas de la base (snake_case)
 const iso = t => t ? new Date(t).toISOString() : null;
 const Fila = {
-  venta: v => ({ id: v.id, fecha: v.fecha, metodo: v.metodo, items: v.items, total: v.total, cierre_id: v.cierreId || null }),
-  deVenta: r => { const v = { id: r.id, fecha: iso(r.fecha), metodo: r.metodo, items: r.items || [], total: r.total }; if (r.cierre_id) v.cierreId = r.cierre_id; return v; },
+  venta: v => ({ id: v.id, fecha: v.fecha, metodo: v.metodo, items: v.items, total: v.total, cierre_id: v.cierreId || null, ...(S.v4 ? { mesa: v.mesa || null } : {}) }),
+  deVenta: r => { const v = { id: r.id, fecha: iso(r.fecha), metodo: r.metodo, items: r.items || [], total: r.total }; if (r.cierre_id) v.cierreId = r.cierre_id; if (r.mesa) v.mesa = r.mesa; return v; },
+  mesa: m => ({ id: m.id, nombre: m.nombre, x: Math.round(m.x || 0), y: Math.round(m.y || 0), sillas: m.sillas || 4, forma: m.forma || 'cuadrada', orden: m.orden || 0,
+    items: m.items || [], personas: m.personas || 0, abierta_en: m.abiertaEn || null, nota: m.nota || '', actualizado: m.actualizado || new Date().toISOString() }),
+  deMesa: r => ({ id: r.id, nombre: r.nombre, x: r.x || 0, y: r.y || 0, sillas: r.sillas || 4, forma: r.forma || 'cuadrada', orden: r.orden || 0,
+    items: r.items || [], personas: r.personas || 0, abiertaEn: iso(r.abierta_en), nota: r.nota || '', actualizado: iso(r.actualizado) }),
+  inv: x => ({ id: x.id, producto_id: x.productoId || null, minimo: x.minimo || 0, activo: x.activo !== false }),
+  deInv: r => ({ id: r.id, productoId: r.producto_id || null, minimo: Number(r.minimo) || 0, activo: r.activo !== false }),
+  mov: m => ({ id: m.id, variante_id: m.varianteId, tipo: m.tipo, cantidad: m.cantidad, fecha: m.fecha, nota: m.nota || '', gasto_id: m.gastoId || null }),
+  deMov: r => ({ id: r.id, varianteId: r.variante_id, tipo: r.tipo, cantidad: Number(r.cantidad), fecha: iso(r.fecha), nota: r.nota || '', gastoId: r.gasto_id || null }),
   tamano: (linea, t) => ({ id: t.id, linea, oz: t.oz, nombre: t.nombre || '', precio: t.precio, ...(S.v3 ? { costo: t.costo ?? null } : {}) }),
   gasto: g => ({ id: g.id, fecha: g.fecha, creado: g.creado, categoria: g.categoria, descripcion: g.descripcion || '', monto: g.monto, medio: g.medio, cierre_id: g.cierreId || null }),
   deGasto: r => { const g = { id: r.id, fecha: String(r.fecha).slice(0, 10), creado: iso(r.creado), categoria: r.categoria, descripcion: r.descripcion || '', monto: r.monto, medio: r.medio }; if (r.cierre_id) g.cierreId = r.cierre_id; return g; },
@@ -500,11 +624,13 @@ const Fila = {
   cierre: c => ({ id: c.id, dia: c.dia, cerrado_en: c.cerradoEn, primera: c.primera, ultima: c.ultima, pedidos: c.pedidos, unidades: c.unidades,
     total: c.total, por_metodo: c.porMetodo, por_linea: c.porLinea, unidades_linea: c.unidadesLinea, base: c.base,
     efectivo_ventas: c.efectivoVentas, efectivo_esperado: c.efectivoEsperado, efectivo_contado: c.efectivoContado,
-    diferencia: c.diferencia, responsable: c.responsable, nota: c.nota, ...(S.v3 ? { gastos_efectivo: c.gastosEfectivo || 0 } : {}) }),
+    diferencia: c.diferencia, responsable: c.responsable, nota: c.nota, ...(S.v3 ? { gastos_efectivo: c.gastosEfectivo || 0 } : {}),
+    ...(S.v4 ? { abierta_en: c.abiertaEn || null, abierta_por: c.abiertaPor || '', estado: c.estado || 'cerrada' } : {}) }),
   deCierre: r => ({ id: r.id, dia: String(r.dia).slice(0, 10), cerradoEn: iso(r.cerrado_en), primera: iso(r.primera), ultima: iso(r.ultima),
     pedidos: r.pedidos, unidades: r.unidades, total: r.total, porMetodo: r.por_metodo || {}, porLinea: r.por_linea || {},
     unidadesLinea: r.unidades_linea || {}, base: r.base || 0, efectivoVentas: r.efectivo_ventas || 0,
-    efectivoEsperado: r.efectivo_esperado || 0, efectivoContado: r.efectivo_contado, diferencia: r.diferencia, responsable: r.responsable || '', nota: r.nota || '', gastosEfectivo: r.gastos_efectivo || 0 })
+    efectivoEsperado: r.efectivo_esperado || 0, efectivoContado: r.efectivo_contado, diferencia: r.diferencia, responsable: r.responsable || '', nota: r.nota || '', gastosEfectivo: r.gastos_efectivo || 0,
+    abiertaEn: iso(r.abierta_en) || iso(r.primera) || iso(r.cerrado_en), abiertaPor: r.abierta_por || r.responsable || '', estado: r.estado || 'cerrada' })
 };
 async function q(consulta){ const { error } = await consulta; if (error) throw error; }
 const trozos = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; };
@@ -532,14 +658,44 @@ const DBNube = {
     let gastos = [];
     try { gastos = (await leerTabla('gastos', 'fecha')).map(Fila.deGasto); S.v3 = true; }
     catch(e){ console.warn('Tabla gastos:', e); S.v3 = false; }
+    // Mesas, inventario y apertura de caja llegaron en la actualización 4
+    let mesas = [], inventario = [], movs = [];
+    try {
+      [mesas, inventario, movs] = await Promise.all([leerTabla('mesas', 'orden'), leerTabla('inventario', 'id'), leerTabla('inv_movs', 'fecha')]);
+      await q(sb.from('cierres').select('estado').limit(1));
+      S.v4 = true;
+    } catch(e){ console.warn('Actualización 4:', e); S.v4 = false; mesas = []; inventario = []; movs = []; }
     const tamanos = {};
     t.forEach(r => (tamanos[r.linea] = tamanos[r.linea] || []).push({ id: r.id, oz: Number(r.oz), nombre: r.nombre || '', precio: r.precio, costo: r.costo ?? null }));
     return {
       lineas: lineas && lineas.length ? lineas.map(r => ({ id: r.id, nombre: r.nombre, uno: r.uno || r.nombre, tipo: r.tipo, color: r.color, orden: r.orden || 0, activo: r.activo !== false })) : null,
       productos: p.length ? p.map(r => ({ id: r.id, nombre: r.nombre, linea: r.linea, color: r.color, activo: r.activo !== false, presentaciones: r.presentaciones || null })) : null,
       tamanos: t.length ? tamanos : null,
-      ventas: v.map(Fila.deVenta), cierres: c.map(Fila.deCierre), gastos
+      ventas: v.map(Fila.deVenta), cierres: c.map(Fila.deCierre), gastos,
+      mesas: mesas.map(Fila.deMesa), inventario: inventario.map(Fila.deInv), movs: movs.map(Fila.deMov),
+      caja: S.v4 ? null : Almacen.get('fi_caja', null)
     };
+  },
+  upsertMesa: m => S.v4 ? q(sb.from('mesas').upsert(Fila.mesa(m))) : Promise.reject(new Error('Falta la actualización 4')),
+  deleteMesa: id => q(sb.from('mesas').delete().eq('id', id)),
+  async leerMesa(id){ const { data, error } = await sb.from('mesas').select('*').eq('id', id).maybeSingle(); if (error) throw error; return data ? Fila.deMesa(data) : null; },
+  async cargarMesas(){ return (await leerTabla('mesas', 'orden')).map(Fila.deMesa); },
+  async estadoCaja(){
+    if (!S.v4) return S.caja;
+    const { data, error } = await sb.from('cierres').select('*').eq('estado', 'abierta').order('abierta_en', { ascending: false }).limit(1);
+    if (error) throw error;
+    return data.length ? Fila.deCierre(data[0]) : null;
+  },
+  upsertInv: x => S.v4 ? q(sb.from('inventario').upsert(Fila.inv(x))) : Promise.reject(new Error('Falta la actualización 4')),
+  deleteInv: id => q(sb.from('inventario').delete().eq('id', id)),
+  addMov: m => S.v4 ? q(sb.from('inv_movs').upsert(Fila.mov(m))) : Promise.reject(new Error('Falta la actualización 4')),
+  deleteMov: id => q(sb.from('inv_movs').delete().eq('id', id)),
+  guardarCaja: c => { if (S.v4) return q(sb.from('cierres').upsert(Fila.cierre(c))); Almacen.set('fi_caja', c); return Promise.resolve(); },
+  async reabrirCierre(id){
+    await q(sb.from('ventas').update({ cierre_id: null }).eq('cierre_id', id));
+    if (S.v3) await q(sb.from('gastos').update({ cierre_id: null }).eq('cierre_id', id));
+    if (S.v4) await q(sb.from('cierres').upsert(Fila.cierre(S.caja)));
+    else { await q(sb.from('cierres').delete().eq('id', id)); Almacen.set('fi_caja', S.caja); }
   },
   upsertGasto: g => S.v3 ? q(sb.from('gastos').upsert(Fila.gasto(g))) : Promise.reject(new Error('Falta la actualización 3')),
   deleteGasto: id => q(sb.from('gastos').delete().eq('id', id)),
@@ -552,7 +708,8 @@ const DBNube = {
   addVenta: v => q(sb.from('ventas').upsert(Fila.venta(v))),
   deleteVenta: id => q(sb.from('ventas').delete().eq('id', id)),
   async addCierre(c, ventaIds, gastoIds = []){
-    await q(sb.from('cierres').insert(Fila.cierre(c)));
+    await q(sb.from('cierres').upsert(Fila.cierre(c)));
+    if (!S.v4) Almacen.set('fi_caja', null);
     for (const t of trozos(ventaIds, 150)) await q(sb.from('ventas').update({ cierre_id: c.id }).in('id', t));
     if (S.v3) for (const t of trozos(gastoIds, 150)) await q(sb.from('gastos').update({ cierre_id: c.id }).in('id', t));
   },
@@ -565,7 +722,8 @@ const DBNube = {
     await q(sb.from('ventas').delete().neq('id', ''));
     if (S.v3) await q(sb.from('gastos').delete().neq('id', ''));
     await q(sb.from('cierres').delete().neq('id', ''));
-    await insertarEnTrozos('cierres', S.cierres.map(Fila.cierre));
+    await insertarEnTrozos('cierres', [...S.cierres, ...(S.v4 && S.caja && !S.caja.virtual ? [S.caja] : [])].map(Fila.cierre));
+    if (!S.v4) Almacen.set('fi_caja', S.caja);
     await insertarEnTrozos('ventas', S.ventas.map(Fila.venta));
     if (S.v3) await insertarEnTrozos('gastos', S.gastos.map(Fila.gasto));
   },
@@ -575,6 +733,14 @@ const DBNube = {
     if (!S.faltaActualizar){ await q(sb.from('lineas').delete().neq('id', '')); await insertarEnTrozos('lineas', S.lineas.map(Fila.linea)); }
     await insertarEnTrozos('productos', S.productos.map(Fila.producto));
     await insertarEnTrozos('tamanos', filasTamanos(S.tamanos));
+    if (S.v4){
+      await q(sb.from('mesas').delete().neq('id', ''));
+      await q(sb.from('inventario').delete().neq('id', ''));
+      await q(sb.from('inv_movs').delete().neq('id', ''));
+      await insertarEnTrozos('mesas', S.mesas.map(Fila.mesa));
+      await insertarEnTrozos('inventario', S.inventario.map(Fila.inv));
+      await insertarEnTrozos('inv_movs', S.movs.map(Fila.mov));
+    }
     await this.reemplazarVentasYCierres();
   },
   // Sube lo que haya en este celular sin borrar nada de la nube
@@ -637,7 +803,9 @@ function pintarEstadoNube(){
   el.innerHTML = (n ? `<div class="warn">⚠ ${n} ${n === 1 ? 'venta' : 'ventas'} sin subir a la nube. Se suben solas cuando vuelva el internet.
     <br><button class="btn sm ghost" id="btnReintentar">Reintentar ahora</button></div>` : '')
     + (NUBE && usuario && (S.faltaActualizar || !S.v3) ? `<div class="warn">⚠ Falta actualizar la base de datos para usar ${S.faltaActualizar ? 'las categorías nuevas, ' : ''}gastos, costos y finanzas.
-    Corre el archivo <b>supabase-actualizacion-3.sql</b> en el SQL Editor de Supabase y recarga la app.</div>` : '');
+    Corre el archivo <b>supabase-actualizacion-3.sql</b> en el SQL Editor de Supabase y recarga la app.</div>` : '')
+    + (NUBE && usuario && !S.v4 ? `<div class="warn">⚠ Falta actualizar la base de datos para usar mesas, inventario y la apertura de caja.
+    Corre el archivo <b>supabase-actualizacion-4.sql</b> en el SQL Editor de Supabase y recarga la app.</div>` : '');
 }
 document.addEventListener('click', e => { if (e.target.id === 'btnReintentar') vaciarCola(); });
 window.addEventListener('online', vaciarCola);
@@ -700,7 +868,10 @@ const nombreMedio = m => m === 'Efectivo' ? 'Efectivo de la caja' : m;
 /* ================= ESTADO ================= */
 const S = {
   lineas: [], productos: [], tamanos: {}, ventas: [], cierres: [], gastos: [],
-  rangoCierre: '30', faltaActualizar: false, v3: true,
+  rangoCierre: '30', faltaActualizar: false, v3: true, v4: true,
+  mesas: [], inventario: [], movs: [], caja: null,
+  vistaMesas: Almacen.get('fi_vista_mesas', window.innerWidth < 640 ? 'lista' : 'plano'), editPlano: false, modoMesa: null,
+  filtroCaja: { desde: '', hasta: '' },
   finModo: 'mes', finRef: (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })(),
   pedido: {},                 // { "productoId|varianteId": cantidad }
   linea: 'granizado',         // categoría elegida en la Caja
@@ -778,100 +949,141 @@ function segLineas(id, actual, opts = {}){
 }
 
 /* ================= NAVEGACIÓN ================= */
-let vista = 'caja';
-document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => {
-  vista = b.dataset.view;
-  document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
-  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'v-' + vista));
+let vista = 'mesas';
+function irA(v){
+  vista = v;
+  const tab = ['fin', 'hist', 'prods'].includes(v) ? 'mas' : v;
+  document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x.dataset.view === tab));
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'v-' + v));
+  document.body.classList.toggle('vista-mesas', v === 'mesas');
   window.scrollTo(0, 0);
   render();
-}));
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => b.dataset.view === 'mas' ? abrirMas() : irA(b.dataset.view)));
+$('#hoyPill').addEventListener('click', () => irA('cierre'));
+function abrirMas(){
+  openSheet(`<h3>Más opciones</h3><p class="sub">Reportes, historial y configuración</p>
+    <div class="mas-menu">
+      <button data-ir="fin"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .9-3 2.1 0 2.9 6 1.6 6 4.6 0 1.3-1.3 2.3-3 2.3-1.5 0-2.7-.6-3.2-1.7M12 6v2M12 16.5v1.5"/></svg><span>Finanzas<small>Gastos, estado de resultados y flujo de caja</small></span></button>
+      <button data-ir="hist"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Historial de ventas<small>Ventas por día, CSV y respaldos</small></span></button>
+      <button data-ir="prods"><svg viewBox="0 0 24 24"><path d="M7 3h10l-1.5 18h-7z"/><path d="M6 8h12M12 3l2-2"/></svg><span>Productos y precios<small>Categorías, sabores, tamaños, costos y datos</small></span></button>
+    </div>`);
+  $('#sheet').onclick = e => { const b = e.target.closest('[data-ir]'); if (b){ closeSheet(); irA(b.dataset.ir); } };
+}
 
 function render(){
+  _stock = null;
   guardarCache();
   renderHoy();
   renderOrderbar();
+  if (vista === 'mesas') renderMesas();
   if (vista === 'caja') renderCaja();
   if (vista === 'stats') renderStats();
   if (vista === 'cierre') renderCierre();
+  if (vista === 'inv') renderInv();
   if (vista === 'fin') renderFin();
   if (vista === 'hist') renderHist();
   if (vista === 'prods') renderProds();
 }
-// Encabezado: muestra la caja abierta (ventas sin cerrar) o el total de hoy si ya se cerró
+// Encabezado: estado de la caja y lo vendido desde que se abrió
 function renderHoy(){
-  const hoy = keyDia(new Date());
-  const pend = S.ventas.filter(v => !v.cierreId);
-  const cerradaHoy = S.cierres.some(c => c.dia === hoy);
-  const pill = $('.hoy-pill');
-  if (pend.length){
+  const pill = $('#hoyPill');
+  if (S.caja){
     pill.firstChild.textContent = 'Caja abierta';
-    $('#hoyTotal').textContent = fmt(pend.reduce((a, v) => a + v.total, 0));
+    $('#hoyTotal').textContent = fmt(S.ventas.filter(v => !v.cierreId).reduce((a, v) => a + v.total, 0));
   } else {
-    // Después de cerrar la caja, el contador vuelve a $0 hasta la siguiente venta
-    pill.firstChild.textContent = cerradaHoy ? 'Caja cerrada ✓' : 'Caja abierta';
-    $('#hoyTotal').textContent = fmt(0);
+    pill.firstChild.textContent = 'Caja cerrada';
+    $('#hoyTotal').textContent = 'Abrir';
   }
 }
 
 /* ===================================================================
-   CAJA
+   VENDER (venta rápida en mostrador o para agregar a una mesa)
    =================================================================== */
+const ICON_WARN = '<svg viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>';
+const ICON_UNLOCK = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>';
+const bannerCaja = para => `<div class="alerta-caja">${ICON_WARN}<div><b>La caja está cerrada</b>Debes abrir la caja para ${para}.</div><button class="btn sm ok" data-abrir-caja>Abrir caja</button></div>`;
+document.addEventListener('click', e => { if (e.target.closest('[data-abrir-caja]')) abrirCajaSheet(); });
+const nombreGuardado = () => Almacen.get('fi_nombre', '') || (usuario && usuario.email ? usuario.email.split('@')[0] : '');
+
+// Texto de inventario para una opción de venta (null si no se controla)
+function stockTxt(vid){
+  const n = stockDe(vid); if (n === null) return null;
+  const libre = n - Object.entries(S.pedido).filter(([k]) => k.endsWith('|' + vid)).reduce((a, [, q]) => a + q, 0);
+  const inv = S.inventario.find(x => x.id === vid);
+  return { n: libre, cls: libre <= 0 ? 'out' : libre <= (inv?.minimo || 0) ? 'low' : '' };
+}
+
 function renderCaja(){
   if (!LINEAS[S.linea] || LINEAS[S.linea].activo === false) S.linea = lineasActivas()[0]?.id || '';
+  const mesa = S.modoMesa && S.mesas.find(m => m.id === S.modoMesa);
+  if (S.modoMesa && !mesa) S.modoMesa = null;
+  $('#vendTop').innerHTML = (!S.caja ? bannerCaja('poder vender') : '')
+    + (mesa ? `<div class="vend-mesa"><span>Agregando productos a <b>${esc(mesa.nombre)}</b></span><button class="btn sm ghost" id="btnCancelMesa">Cancelar</button></div>` : '');
   segLineas('#lineaCaja', S.linea);
   const L = LINEAS[S.linea];
   const lista = S.productos.filter(p => p.activo && p.linea === S.linea);
+  $('#prodGrid').classList.toggle('bloqueado', !S.caja);
   $('#prodGrid').innerHTML = lista.length ? lista.map(p => {
     const vs = variantesDe(p);
     const precioTxt = !vs.length ? (esPorTamano(p.linea) ? 'Sin tamaños' : 'Sin precio')
       : vs.length === 1 ? fmt(vs[0].precio) + (esPorTamano(p.linea) ? ' · ' + vs[0].etiqueta : '')
       : 'Desde ' + fmt(Math.min(...vs.map(v => v.precio)));
     const q = Object.entries(S.pedido).filter(([k]) => k.startsWith(p.id + '|')).reduce((a, [, n]) => a + n, 0);
+    const st = !esPorTamano(p.linea) && vs.length === 1 ? stockTxt(vs[0].id) : null;
     return `<button class="prod" style="--c:${p.color}" data-add="${p.id}">
       ${q ? `<span class="q">${q}</span>` : ''}
       <div class="cat">${esc(unoDe(p.linea))}</div>
       <div class="n">${esc(p.nombre)}</div>
       <div class="p">${precioTxt}</div>
+      ${st ? `<span class="stock ${st.cls}">${st.n <= 0 ? 'Agotado' : 'Quedan ' + st.n}</span>` : ''}
     </button>`;
-  }).join('') : `<div class="empty" style="grid-column:1/-1">${L ? 'No hay productos en ' + esc(L.nombre) + '.' : 'No hay categorías visibles.'} Agrégalos en la pestaña Productos.</div>`;
+  }).join('') : `<div class="empty" style="grid-column:1/-1">${L ? 'No hay productos en ' + esc(L.nombre) + '.' : 'No hay categorías visibles.'} Agrégalos en Más → Productos.</div>`;
 }
+$('#vendTop').addEventListener('click', e => {
+  if (e.target.id === 'btnCancelMesa'){ S.modoMesa = null; S.pedido = {}; irA('mesas'); }
+});
 $('#lineaCaja').addEventListener('click', e => {
   const b = e.target.closest('[data-l]'); if (!b) return;
   S.linea = b.dataset.l; renderCaja();
 });
 $('#prodGrid').addEventListener('click', e => {
-  const b = e.target.closest('[data-add]'); if (b) elegirVariante(b.dataset.add);
+  const b = e.target.closest('[data-add]'); if (!b) return;
+  if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
+  elegirVariante(b.dataset.add);
 });
 
 function agregar(pid, vid){
+  const st = stockTxt(vid);
   const k = pid + '|' + vid;
   S.pedido[k] = (S.pedido[k] || 0) + 1;
   if (navigator.vibrate) navigator.vibrate(15);
   renderCaja(); renderOrderbar();
+  return st && st.n <= 0;
 }
 function elegirVariante(pid){
   const p = S.productos.find(x => x.id === pid); if (!p) return;
   const vs = variantesDe(p), porTam = esPorTamano(p.linea);
   if (!vs.length) return toast(porTam ? 'Agrega tamaños de ' + nombreLinea(p.linea).toLowerCase() + ' en Productos' : 'Ponle precio a ' + p.nombre + ' en Productos');
-  if (vs.length === 1){ agregar(pid, vs[0].id); toast('+1 ' + p.nombre); return; }
+  if (vs.length === 1){ const sin = agregar(pid, vs[0].id); toast(sin ? 'Ojo: ' + p.nombre + ' aparece agotado en inventario' : '+1 ' + p.nombre); return; }
   openSheet(`
     <h3>${esc(p.nombre)}</h3>
     <p class="sub">${esc(unoDe(p.linea))} · elige ${porTam ? 'el tamaño' : 'la presentación'}</p>
     <div class="tam-grid">${vs.map(v => {
-      const q = S.pedido[pid + '|' + v.id] || 0;
+      const q = S.pedido[pid + '|' + v.id] || 0, st = stockTxt(v.id);
       return `<button class="tam-btn" data-t="${v.id}">
         ${q ? `<span class="q">${q}</span>` : ''}
         <div class="o ${porTam ? '' : 'txt'}">${esc(v.grande)}${v.unidad ? `<small>${v.unidad}</small>` : ''}</div>
         <div class="nm">${esc(v.sub)}</div>
         <div class="pr">${fmt(v.precio)}</div>
+        ${st ? `<div class="stock" style="${st.cls === 'out' ? 'color:var(--danger)' : st.cls === 'low' ? 'color:var(--ocup)' : ''}">${st.n <= 0 ? 'Agotado' : st.n + (porTam ? ' vasos' : ' disp.')}</div>` : ''}
       </button>`; }).join('')}
     </div>`);
   $('#sheet').onclick = e => {
     const b = e.target.closest('[data-t]'); if (!b) return;
     const v = vs.find(x => x.id === b.dataset.t);
-    agregar(pid, b.dataset.t); closeSheet();
-    toast('+1 ' + p.nombre + ' ' + v.etiqueta);
+    const sin = agregar(pid, b.dataset.t); closeSheet();
+    toast(sin ? 'Ojo: ' + p.nombre + ' ' + v.etiqueta + ' aparece agotado en inventario' : '+1 ' + p.nombre + ' ' + v.etiqueta);
   };
 }
 
@@ -891,13 +1103,18 @@ function renderOrderbar(){
   document.body.classList.toggle('con-pedido', show);
   $('#obCount').textContent = n + (n === 1 ? ' producto' : ' productos');
   $('#obTotal').textContent = fmt(items.reduce((a, it) => a + it.precio * it.cantidad, 0));
+  const mesa = S.modoMesa && S.mesas.find(m => m.id === S.modoMesa);
+  $('#btnCobrar').textContent = mesa ? 'Agregar a ' + mesa.nombre : 'Cobrar';
+  $('#btnAMesa').style.display = mesa || !S.mesas.length ? 'none' : '';
 }
 $('#btnClearOrder').addEventListener('click', () => { S.pedido = {}; render(); });
-$('#btnCobrar').addEventListener('click', abrirCobro);
+$('#btnCobrar').addEventListener('click', () => S.modoMesa ? agregarPedidoAMesa(S.modoMesa) : abrirCobro());
+$('#btnAMesa').addEventListener('click', () => elegirMesa('Enviar el pedido a…', id => agregarPedidoAMesa(id)));
 
 function abrirCobro(){
   const items = pedidoItems();
   if (!items.length){ closeSheet(); render(); return; }
+  if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
   const total = items.reduce((a, it) => a + it.precio * it.cantidad, 0);
   openSheet(`
     <h3>Confirmar venta</h3>
@@ -924,15 +1141,532 @@ function abrirCobro(){
     if (e.target.id === 'btnConfirmar') await registrarVenta();
   };
 }
-async function registrarVenta(){
-  const items = pedidoItems().map(({ key, ...it }) => it); if (!items.length) return;
-  const venta = { id: uid(), fecha: new Date().toISOString(), metodo: S.metodo, items, total: items.reduce((a, it) => a + it.precio * it.cantidad, 0) };
+// Crea y guarda una venta. Devuelve false si quedó guardada solo en el celular (sin internet)
+async function crearVenta(items, metodo, extra = {}){
+  const limpios = items.map(({ key, ...it }) => it);
+  const venta = { id: uid(), fecha: new Date().toISOString(), metodo, items: limpios, total: limpios.reduce((a, it) => a + it.precio * it.cantidad, 0), ...extra };
   S.ventas.push(venta);
   const enNube = await guardarVenta(venta);
+  return { venta, enNube };
+}
+async function registrarVenta(){
+  const items = pedidoItems(); if (!items.length) return;
+  if (!S.caja){ closeSheet(); toast('Primero abre la caja'); return abrirCajaSheet(); }
+  const { venta, enNube } = await crearVenta(items, S.metodo);
   S.pedido = {};
   S.metodo = 'Efectivo';   // cada venta nueva arranca en efectivo
   closeSheet(); render();
   toast(enNube === false ? 'Sin internet: venta guardada en el celular' : 'Venta registrada · ' + fmt(venta.total));
+}
+
+/* ===================================================================
+   APERTURA DE CAJA
+   Mientras la caja está cerrada no se puede vender ni operar las mesas.
+   =================================================================== */
+function nuevaCaja({ id, abiertaEn, abiertaPor, base, virtual }){
+  return { id: id || uid(), dia: keyDia(new Date(abiertaEn)), estado: 'abierta', abiertaEn, abiertaPor: abiertaPor || '', cerradoEn: null,
+    primera: null, ultima: null, pedidos: 0, unidades: 0, total: 0, porMetodo: {}, porLinea: {}, unidadesLinea: {},
+    base: base || 0, efectivoVentas: 0, efectivoEsperado: base || 0, efectivoContado: null, diferencia: null,
+    responsable: '', nota: '', gastosEfectivo: 0, ...(virtual ? { virtual: true } : {}) };
+}
+function abrirCajaSheet(){
+  if (S.caja) return irA('cierre');
+  const u = ultimoCierre();
+  openSheet(`
+    <h3>Abrir caja</h3>
+    <p class="sub">Cuenta el efectivo con el que arrancas (la base) antes de empezar a vender.</p>
+    <label class="f">Monto inicial en caja (efectivo)</label>
+    <input class="in monto-in" id="sBase" type="number" inputmode="numeric" min="0" step="1000" value="${u ? u.base : ''}" placeholder="0">
+    <label class="f">Quién abre</label>
+    <input class="in" id="sNombre" value="${esc(nombreGuardado())}" placeholder="Tu nombre" maxlength="30">
+    <button class="btn ok block" id="sAbrir" style="margin-top:18px;padding:15px">${ICON_UNLOCK} Abrir caja</button>`);
+  $('#sheet').onclick = e => { if (e.target.closest('#sAbrir')) abrirCaja($('#sBase').value, $('#sNombre').value); };
+}
+async function abrirCaja(baseTxt, nombre){
+  const base = Math.max(0, Math.round(Number(baseTxt) || 0));
+  nombre = String(nombre || '').trim();
+  if (!nombre) return toast('Escribe quién abre la caja');
+  if (NUBE && !navigator.onLine) return toast('Necesitas internet para abrir la caja');
+  if (NUBE && S.v4){
+    try { const c = await DB.estadoCaja(); if (c){ S.caja = c; closeSheet(); render(); return toast('La caja ya la abrió ' + (c.abiertaPor || 'otra persona')); } }
+    catch(e){ console.warn(e); }
+  }
+  if (S.caja){ closeSheet(); return toast('La caja ya está abierta'); }
+  Almacen.set('fi_nombre', nombre);
+  S.caja = nuevaCaja({ abiertaEn: new Date().toISOString(), abiertaPor: nombre, base });
+  closeSheet(); render();
+  if (await guardar(DB.guardarCaja(S.caja))) toast('Caja abierta · base ' + fmt(base));
+}
+
+/* ===================================================================
+   MESAS
+   Cada mesa guarda su cuenta abierta (los productos pedidos) en la nube,
+   así se ve igual desde cualquier celular. Al cobrar se vuelve una venta.
+   =================================================================== */
+const ICON_PERS = '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5a3 3 0 0 1 0 6M18 14.5c2 .7 3 2.8 3 5.5"/></svg>';
+const MESA_W = 150, MESA_H = 96, CELDA = 20;
+const totalMesa = m => (m.items || []).reduce((a, it) => a + it.precio * it.cantidad, 0);
+const ocupada = m => (m.items || []).length > 0;
+const mesasOrden = () => [...S.mesas].sort((a, b) => (a.orden || 0) - (b.orden || 0) || a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
+const hace = iso => { if (!iso) return ''; const min = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+  return min < 1 ? 'hace un momento' : min < 60 ? 'hace ' + min + ' min' : 'hace ' + Math.floor(min / 60) + ' h ' + (min % 60) + ' min'; };
+const necesitaV4 = () => NUBE && !S.v4;
+
+function tarjetaMesa(m, enPlano){
+  const oc = ocupada(m);
+  return `<button class="mesa ${oc ? 'ocup' : ''} ${m.forma === 'redonda' ? 'redonda' : ''}" data-mesa="${m.id}" ${enPlano ? `style="left:${m.x}px;top:${m.y}px"` : ''}>
+    <div class="mn"><span>${esc(m.nombre)}</span><i></i></div>
+    <div class="mp">${ICON_PERS}${m.personas || 0}/${m.sillas}</div>
+    ${oc ? `<div class="mt">${fmt(totalMesa(m))}</div>` : ''}
+  </button>`;
+}
+function renderMesas(){
+  const ocup = S.mesas.filter(ocupada), totOc = ocup.reduce((a, m) => a + totalMesa(m), 0);
+  const plano = S.editPlano || S.vistaMesas === 'plano';
+  $('#mesasTop').innerHTML = (!S.caja && !S.editPlano ? bannerCaja('operar las mesas') : '') + `
+    <div class="mesas-bar"><h2>${S.editPlano ? 'Editando plano' : 'Mesas'}</h2>
+      ${S.editPlano ? `<button class="btn sm" data-m="nueva">+ Mesa</button><button class="btn sm ok" data-m="listo">Listo</button>`
+        : `<div class="seg"><button data-m="plano" class="${plano ? 'on' : ''}">Plano</button><button data-m="lista" class="${plano ? '' : 'on'}">Lista</button></div>
+           <button class="btn sm ghost" data-m="editar">Editar mesas</button>`}
+    </div>
+    ${S.editPlano ? '<p class="mesa-hint" style="margin:0 2px 10px">Arrastra las mesas para acomodarlas. Toca una para cambiarle el nombre, las sillas o eliminarla.</p>'
+      : `<div class="leyenda"><span><i style="background:var(--libre)"></i>Libre</span><span><i style="background:var(--ocup)"></i>Ocupada · ${ocup.length}</span>${ocup.length ? `<span style="margin-left:auto;color:var(--ink)">${fmt(totOc)} en mesas</span>` : ''}</div>`}`;
+  if (necesitaV4()){ $('#mesasBody').innerHTML = '<div class="empty">Para usar las mesas falta actualizar la base de datos (mira el aviso de arriba).</div>'; return; }
+  if (!S.mesas.length){
+    $('#mesasBody').innerHTML = `<div class="card"><div class="empty" style="padding:18px 8px">Todavía no hay mesas.<br><br>
+      <button class="btn" data-m="ejemplo">Crear 6 mesas</button> <button class="btn ghost" data-m="nueva">+ Una mesa</button></div></div>`;
+    return;
+  }
+  const lista = mesasOrden();
+  if (!plano){
+    $('#mesasBody').innerHTML = `<div class="mesas-grid ${S.caja ? '' : 'bloqueado'}">${lista.map(m => tarjetaMesa(m, false)).join('')}</div>`;
+    return;
+  }
+  let W = Math.max(760, ...lista.map(m => m.x + MESA_W + 40)), H = Math.max(420, ...lista.map(m => m.y + MESA_H + 60));
+  const cw = $('#mesasBody').clientWidth || 360;
+  const esc_ = Math.min(1, Math.max(0.62, (cw - 2) / W));
+  W = Math.max(W, Math.floor((cw - 2) / esc_));   // el plano ocupa todo el ancho disponible
+  S._esc = esc_;
+  $('#mesasBody').innerHTML = `<div class="plano-wrap ${S.caja || S.editPlano ? '' : 'bloqueado'}"><div style="width:${W * esc_}px;height:${H * esc_}px;position:relative;overflow:hidden">
+      <div class="plano ${S.editPlano ? 'editando' : ''}" style="width:${W}px;height:${H}px;transform:scale(${esc_})">${lista.map(m => tarjetaMesa(m, true)).join('')}</div>
+    </div></div>
+    ${S.editPlano ? '' : '<p class="mesa-hint">Toca una mesa para ver su cuenta, agregar productos o cobrar.</p>'}`;
+}
+window.addEventListener('resize', () => { if (vista === 'mesas') renderMesas(); });
+
+$('#mesasTop').addEventListener('click', e => {
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  accionMesas(b.dataset.m);
+});
+$('#mesasBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-m]'); if (b) return accionMesas(b.dataset.m);
+  const m = e.target.closest('[data-mesa]'); if (!m || S.editPlano) return;
+  if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
+  abrirMesa(m.dataset.mesa);
+});
+async function accionMesas(a){
+  if (a === 'plano' || a === 'lista'){ S.vistaMesas = a; Almacen.set('fi_vista_mesas', a); return renderMesas(); }
+  if (a === 'editar'){ S.editPlano = true; return renderMesas(); }
+  if (a === 'listo'){ S.editPlano = false; return renderMesas(); }
+  if (a === 'nueva') return editarMesa(null);
+  if (a === 'ejemplo'){
+    if (necesitaV4()) return toast('Falta actualizar la base de datos (ver aviso)');
+    const nuevas = [1, 2, 3, 4, 5, 6].map((n, i) => ({ id: uid(), nombre: 'Mesa ' + n, x: 40 + (i % 3) * 200, y: 40 + Math.floor(i / 3) * 140,
+      sillas: 4, forma: 'cuadrada', orden: n, items: [], personas: 0, abiertaEn: null, nota: '' }));
+    S.mesas.push(...nuevas); render();
+    if (await guardar(Promise.all(nuevas.map(m => DB.upsertMesa(m))))) toast('Mesas creadas');
+  }
+}
+
+// Arrastrar mesas en el plano (solo en modo edición)
+$('#mesasBody').addEventListener('pointerdown', e => {
+  if (!S.editPlano) return;
+  const el = e.target.closest('.mesa'); if (!el) return;
+  const m = S.mesas.find(x => x.id === el.dataset.mesa); if (!m) return;
+  e.preventDefault();
+  const s = S._esc || 1, x0 = e.clientX, y0 = e.clientY, mx = m.x, my = m.y;
+  let movido = false;
+  try { el.setPointerCapture(e.pointerId); } catch(err){}
+  el.classList.add('drag');
+  const pos = ev => ({ x: Math.max(0, mx + (ev.clientX - x0) / s), y: Math.max(0, my + (ev.clientY - y0) / s) });
+  const mover = ev => {
+    if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 6) movido = true;
+    const p = pos(ev); el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+  };
+  const soltar = async ev => {
+    el.removeEventListener('pointermove', mover); el.removeEventListener('pointerup', soltar); el.removeEventListener('pointercancel', soltar);
+    el.classList.remove('drag');
+    if (!movido) return editarMesa(m.id);
+    const p = pos(ev), nx = Math.round(p.x / CELDA) * CELDA, ny = Math.round(p.y / CELDA) * CELDA;
+    m.x = nx; m.y = ny; renderMesas();
+    await actualizarMesa(m.id, x => { x.x = nx; x.y = ny; });
+  };
+  el.addEventListener('pointermove', mover); el.addEventListener('pointerup', soltar); el.addEventListener('pointercancel', soltar);
+});
+
+// Trae la versión más reciente de la mesa, le aplica el cambio y la guarda (evita pisar lo que agregó otro celular)
+async function refrescarMesa(id){
+  if (NUBE && S.v4){
+    try { const f = await DB.leerMesa(id); if (f) S.mesas = S.mesas.map(x => x.id === id ? f : x); else S.mesas = S.mesas.filter(x => x.id !== id); }
+    catch(e){ console.warn(e); }
+  }
+  return S.mesas.find(x => x.id === id) || null;
+}
+async function actualizarMesa(id, fn){
+  const m = await refrescarMesa(id);
+  if (!m){ toast('Esa mesa ya no existe'); render(); return null; }
+  fn(m);
+  m.actualizado = new Date().toISOString();
+  render();
+  return await guardar(DB.upsertMesa(m)) ? m : null;
+}
+function juntarItems(dest, items){
+  items.forEach(it => {
+    const x = dest.find(d => d.productoId === it.productoId && d.tamanoId === it.tamanoId && d.precio === it.precio);
+    if (x) x.cantidad += it.cantidad; else dest.push({ ...it });
+  });
+  return dest;
+}
+const limpiarMesa = m => { m.items = []; m.personas = 0; m.abiertaEn = null; m.nota = ''; };
+
+async function agregarPedidoAMesa(id){
+  const items = pedidoItems().map(({ key, ...it }) => it); if (!items.length) return;
+  if (!S.caja){ toast('Primero abre la caja'); return abrirCajaSheet(); }
+  closeSheet();
+  const m = await actualizarMesa(id, x => {
+    x.items = juntarItems(x.items || [], items);
+    if (!x.abiertaEn) x.abiertaEn = new Date().toISOString();
+    if (!x.personas) x.personas = 1;
+  });
+  if (!m) return;
+  S.pedido = {}; S.modoMesa = null;
+  irA('mesas');
+  toast('Agregado a ' + m.nombre);
+}
+function elegirMesa(titulo, alElegir, excluir){
+  const lista = mesasOrden().filter(m => m.id !== excluir);
+  if (!lista.length) return toast('No hay otras mesas');
+  openSheet(`<h3>${esc(titulo)}</h3><p class="sub">Verde: libre · naranja: con cuenta abierta</p>
+    <div class="mesa-pick">${lista.map(m => `<button data-pick="${m.id}" class="${ocupada(m) ? 'ocup' : ''}">${esc(m.nombre)}<small>${ocupada(m) ? fmt(totalMesa(m)) : 'Libre'} · ${m.personas || 0}/${m.sillas}</small></button>`).join('')}</div>`);
+  $('#sheet').onclick = e => { const b = e.target.closest('[data-pick]'); if (b) alElegir(b.dataset.pick); };
+}
+
+function abrirMesa(id){
+  const m = S.mesas.find(x => x.id === id); if (!m) return;
+  const items = m.items || [], oc = items.length > 0;
+  openSheet(`
+    <h3>${esc(m.nombre)}</h3>
+    <p class="sub">${oc ? 'Cuenta abierta ' + hace(m.abiertaEn) : 'Mesa libre'} · ${m.sillas} sillas</p>
+    <div class="kv" style="align-items:center"><span>Personas</span>
+      <div class="stepper"><button class="icon-btn" data-per="-1" aria-label="Menos">−</button><b>${m.personas || 0}</b><button class="icon-btn" data-per="1" aria-label="Más">+</button></div></div>
+    ${oc ? items.map(it => { const k = it.productoId + '|' + it.tamanoId; return `
+      <div class="line">
+        <div class="nm">${esc(it.nombre)} · ${esc(varTxt(it))}<small>${esc(unoDe(it.linea))} · ${fmt(it.precio)}</small></div>
+        <div class="qty">
+          <button class="icon-btn" data-mq="${k}" data-d="-1" aria-label="Menos">−</button>
+          <b>${it.cantidad}</b>
+          <button class="icon-btn" data-mq="${k}" data-d="1" aria-label="Más">+</button>
+        </div>
+        <div class="st">${fmt(it.precio * it.cantidad)}</div>
+      </div>`; }).join('') + `<div class="total-row"><span>Total</span><span>${fmt(totalMesa(m))}</span></div>`
+      : '<div class="empty" style="padding:18px 8px">Sin productos todavía.</div>'}
+    <button class="btn ${oc ? 'ghost' : ''} block" id="mAgregar" style="margin-top:6px">+ Agregar productos</button>
+    ${oc ? `<button class="btn block" id="mCobrar" style="margin-top:10px">Cobrar ${fmt(totalMesa(m))}</button>
+    <div class="row2"><button class="btn ghost" id="mMover">Mover / juntar</button><button class="btn danger" id="mLiberar">Liberar mesa</button></div>` : ''}`);
+  $('#sheet').onclick = async e => {
+    const per = e.target.closest('[data-per]');
+    if (per){ const r = await actualizarMesa(id, x => { x.personas = Math.max(0, (x.personas || 0) + Number(per.dataset.per)); }); if (r) abrirMesa(id); return; }
+    const q = e.target.closest('[data-mq]');
+    if (q){
+      const [pid, vid] = q.dataset.mq.split('|'), d = Number(q.dataset.d);
+      const r = await actualizarMesa(id, x => {
+        const it = (x.items || []).find(i => i.productoId === pid && String(i.tamanoId) === vid); if (!it) return;
+        it.cantidad += d;
+        x.items = x.items.filter(i => i.cantidad > 0);
+        if (!x.items.length) limpiarMesa(x);
+      });
+      if (r) abrirMesa(id); return;
+    }
+    if (e.target.id === 'mAgregar'){ S.modoMesa = id; S.pedido = {}; closeSheet(); irA('caja'); return; }
+    if (e.target.id === 'mCobrar') return cobrarMesa(id);
+    if (e.target.id === 'mMover') return elegirMesa('Mover ' + m.nombre + ' a…', destino => moverMesa(id, destino), id);
+    if (e.target.id === 'mLiberar'){
+      if (!await confirmar(`¿Liberar ${m.nombre}? Se borra la cuenta de ${fmt(totalMesa(m))} sin cobrarla.`, 'Liberar')) return;
+      closeSheet();
+      if (await actualizarMesa(id, limpiarMesa)) toast(m.nombre + ' liberada');
+    }
+  };
+}
+async function moverMesa(origen, destino){
+  const a = await refrescarMesa(origen), b = await refrescarMesa(destino);
+  if (!a || !b) return toast('No se encontró la mesa');
+  if (ocupada(b) && !await confirmar(`${b.nombre} ya tiene cuenta abierta. ¿Juntar las dos cuentas en ${b.nombre}?`, 'Juntar', false)) return;
+  b.items = juntarItems(b.items || [], a.items || []);
+  b.personas = (b.personas || 0) + (a.personas || 0);
+  b.abiertaEn = [a.abiertaEn, b.abiertaEn].filter(Boolean).sort()[0] || new Date().toISOString();
+  limpiarMesa(a);
+  a.actualizado = b.actualizado = new Date().toISOString();
+  closeSheet(); render();
+  if (await guardar(Promise.all([DB.upsertMesa(b), DB.upsertMesa(a)]))) toast('Cuenta pasada a ' + b.nombre);
+}
+function cobrarMesa(id, metodo = 'Efectivo'){
+  const m = S.mesas.find(x => x.id === id); if (!m) return;
+  openSheet(`
+    <h3>Cobrar ${esc(m.nombre)}</h3>
+    <p class="sub">${(m.items || []).reduce((a, it) => a + it.cantidad, 0)} productos · ${m.personas || 0} personas</p>
+    ${(m.items || []).map(it => `<div class="kv"><span>${it.cantidad}× ${esc(it.nombre)} ${esc(varTxt(it))}</span><span>${fmt(it.precio * it.cantidad)}</span></div>`).join('')}
+    <label class="f">Método de pago</label>
+    <div class="chips" id="payChips">${METODOS.map(x => `<button class="chip ${x === metodo ? 'on' : ''}" data-m="${x}">${x}</button>`).join('')}</div>
+    <div class="total-row"><span>Total</span><span>${fmt(totalMesa(m))}</span></div>
+    <button class="btn block" id="mConfirmar">Registrar venta</button>
+    <button class="btn ghost block" id="mVolver" style="margin-top:8px">Volver a la mesa</button>`);
+  $('#sheet').onclick = async e => {
+    const c = e.target.closest('[data-m]'); if (c) return cobrarMesa(id, c.dataset.m);
+    if (e.target.id === 'mVolver') return abrirMesa(id);
+    if (e.target.id !== 'mConfirmar') return;
+    if (!S.caja){ closeSheet(); toast('Primero abre la caja'); return abrirCajaSheet(); }
+    e.target.disabled = true;
+    const antes = totalMesa(m);
+    const f = await refrescarMesa(id);
+    if (!f || !ocupada(f)){ closeSheet(); render(); return toast('Esa cuenta ya se cobró o se liberó'); }
+    if (totalMesa(f) !== antes){ toast('La cuenta cambió desde otro celular. Revísala'); return cobrarMesa(id, metodo); }
+    const { venta, enNube } = await crearVenta(f.items, metodo, { mesa: f.nombre });
+    closeSheet();
+    await actualizarMesa(id, limpiarMesa);
+    toast(enNube === false ? 'Sin internet: venta guardada en el celular' : f.nombre + ' cobrada · ' + fmt(venta.total));
+  };
+}
+function editarMesa(id){
+  if (necesitaV4()) return toast('Falta actualizar la base de datos (ver aviso)');
+  const m = id ? S.mesas.find(x => x.id === id) : { nombre: 'Mesa ' + (S.mesas.length + 1), sillas: 4, forma: 'cuadrada' };
+  if (!m) return;
+  let forma = m.forma || 'cuadrada';
+  openSheet(`
+    <h3>${id ? 'Editar mesa' : 'Nueva mesa'}</h3>
+    <label class="f">Nombre</label>
+    <input class="in" id="meNombre" value="${esc(m.nombre)}" placeholder="Ej: Mesa 7, Barra 1, Terraza" maxlength="20">
+    <div class="two">
+      <div><label class="f">Sillas</label><input class="in" id="meSillas" type="number" inputmode="numeric" min="1" max="30" value="${m.sillas}"></div>
+      <div><label class="f">Forma</label><div class="seg" style="display:grid;grid-template-columns:1fr 1fr"><button data-fo="cuadrada" class="${forma === 'cuadrada' ? 'on' : ''}" style="padding:10px">Cuadrada</button><button data-fo="redonda" class="${forma === 'redonda' ? 'on' : ''}" style="padding:10px">Redonda</button></div></div>
+    </div>
+    <div class="row2">
+      ${id ? '<button class="btn danger" id="meDel">Eliminar</button>' : '<button class="btn ghost" id="meCancel">Cancelar</button>'}
+      <button class="btn" id="meSave">Guardar</button>
+    </div>`);
+  $('#sheet').onclick = async e => {
+    const fo = e.target.closest('[data-fo]');
+    if (fo){ forma = fo.dataset.fo; document.querySelectorAll('[data-fo]').forEach(x => x.classList.toggle('on', x === fo)); return; }
+    if (e.target.id === 'meCancel') return closeSheet();
+    if (e.target.id === 'meDel'){
+      if (ocupada(m)) return toast('Esa mesa tiene una cuenta abierta. Cóbrala o libérala primero');
+      if (!await confirmar(`¿Eliminar ${m.nombre}?`)) return;
+      S.mesas = S.mesas.filter(x => x.id !== id);
+      closeSheet(); render();
+      if (await guardar(DB.deleteMesa(id))) toast('Mesa eliminada');
+      return;
+    }
+    if (e.target.id !== 'meSave') return;
+    const nombre = $('#meNombre').value.trim(), sillas = Math.round(Number($('#meSillas').value));
+    if (!nombre) return toast('Escribe el nombre');
+    if (!(sillas >= 1)) return toast('Escribe cuántas sillas tiene');
+    if (S.mesas.some(x => x.id !== id && x.nombre.toLowerCase() === nombre.toLowerCase())) return toast('Ya existe una mesa con ese nombre');
+    closeSheet();
+    if (id){ if (await actualizarMesa(id, x => { x.nombre = nombre; x.sillas = sillas; x.forma = forma; })) toast('Mesa guardada'); return; }
+    const p = lugarLibre();
+    const nueva = { id: uid(), nombre, sillas, forma, x: p.x, y: p.y, orden: Math.max(0, ...S.mesas.map(x => x.orden || 0)) + 1, items: [], personas: 0, abiertaEn: null, nota: '' };
+    S.mesas.push(nueva); render();
+    if (await guardar(DB.upsertMesa(nueva))) toast('Mesa creada');
+  };
+}
+// Busca un espacio del plano donde no choque con otra mesa
+function lugarLibre(){
+  const choca = (x, y) => S.mesas.some(m => x < m.x + MESA_W + 20 && x + MESA_W + 20 > m.x && y < m.y + MESA_H + 20 && y + MESA_H + 20 > m.y);
+  for (let y = 40; y < 4000; y += 140) for (let x = 40; x <= 840; x += 200) if (!choca(x, y)) return { x, y };
+  return { x: 40, y: 40 };
+}
+
+/* ===================================================================
+   INVENTARIO
+   Las existencias se calculan con los movimientos (entradas, salidas y conteos)
+   menos lo vendido después del último conteo. Así no se descuadra aunque
+   vendan desde varios celulares al mismo tiempo.
+   =================================================================== */
+let _stock = null;
+function variantesInventario(){
+  const out = [];
+  lineasOrden().forEach(L => {
+    if (esPorTamano(L.id)) tamanosDe(L.id).forEach(t => out.push({ id: t.id, nombre: 'Vasos ' + t.oz + ' oz · ' + L.nombre, sub: 'Todos los sabores', linea: L.id, color: L.color, unidad: 'vasos' }));
+    else S.productos.filter(p => p.linea === L.id).forEach(p => (p.presentaciones || []).forEach(x => out.push({ id: x.id, productoId: p.id,
+      nombre: p.nombre + ((p.presentaciones.length > 1 || x.nombre !== 'Unidad') ? ' · ' + x.nombre : ''), sub: L.nombre, linea: L.id, color: p.color, unidad: 'unid.' })));
+  });
+  return out;
+}
+function calcStock(){
+  const m = {};
+  S.inventario.forEach(x => { m[x.id] = { stock: 0, t0: '' }; });
+  [...S.movs].sort((a, b) => a.fecha.localeCompare(b.fecha)).forEach(mv => {
+    const x = m[mv.varianteId]; if (!x) return;
+    if (mv.tipo === 'conteo'){ x.stock = mv.cantidad; x.t0 = mv.fecha; }
+    else if (mv.tipo === 'entrada') x.stock += mv.cantidad;
+    else x.stock -= mv.cantidad;
+  });
+  S.ventas.forEach(v => v.items.forEach(it => { const x = m[it.tamanoId]; if (x && v.fecha > x.t0) x.stock -= it.cantidad; }));
+  S.mesas.forEach(me => (me.items || []).forEach(it => { const x = m[it.tamanoId]; if (x) x.stock -= it.cantidad; }));
+  return m;
+}
+const stockDe = id => { if (!_stock) _stock = calcStock(); return _stock[id] ? Math.round(_stock[id].stock * 100) / 100 : null; };
+const TIPOS_MOV = { entrada: 'Entrada', merma: 'Salida / merma', conteo: 'Conteo' };
+
+function renderInv(){
+  const vars = variantesInventario(), porId = Object.fromEntries(vars.map(v => [v.id, v]));
+  const items = S.inventario.filter(x => porId[x.id]).map(x => ({ ...x, v: porId[x.id], stock: stockDe(x.id) }));
+  const agot = items.filter(x => x.stock <= 0), bajos = items.filter(x => x.stock > 0 && x.stock <= x.minimo);
+  $('#invTop').innerHTML = `<div class="mesas-bar"><h2>Inventario</h2><button class="btn sm" data-iv="config">Configurar</button></div>`;
+  if (necesitaV4()){ $('#invBody').innerHTML = '<div class="empty">Para usar el inventario falta actualizar la base de datos (mira el aviso de arriba).</div>'; return; }
+  if (!items.length){
+    $('#invBody').innerHTML = `<div class="card"><div class="empty" style="padding:18px 8px">Todavía no estás controlando ningún producto.<br>
+      Elige qué productos contar (cervezas, licores, agua, vasos…), escribe cuánto hay y la app los descuenta sola con cada venta.<br><br>
+      <button class="btn" data-iv="config">Configurar inventario</button></div></div>`;
+    return;
+  }
+  const fila = x => { const cls = x.stock <= 0 ? 'out' : x.stock <= x.minimo ? 'low' : '';
+    return `<button class="inv-row" data-inv="${x.id}"><span class="dot" style="--c:${x.v.color}"></span>
+      <div class="d">${esc(x.v.nombre)}${cls === 'out' ? '<span class="bdg out">Agotado</span>' : cls === 'low' ? '<span class="bdg low">Bajo</span>' : ''}<small>${esc(x.v.sub)} · mínimo ${x.minimo}</small></div>
+      <div class="stk ${cls}">${x.stock.toLocaleString('es-CO')}<small>${x.v.unidad}</small></div></button>`; };
+  let html = `<div class="kpis">
+      <div class="kpi"><div class="l">Productos controlados</div><div class="v">${items.length}</div></div>
+      <div class="kpi"><div class="l">Por pedir (bajos)</div><div class="v" style="color:var(--ocup)">${bajos.length}</div></div>
+      <div class="kpi"><div class="l">Agotados</div><div class="v" style="color:var(--danger)">${agot.length}</div></div>
+      <div class="kpi"><div class="l">Movimientos</div><div class="v">${S.movs.length}</div></div>
+    </div>`;
+  if (agot.length || bajos.length) html += `<div class="warn">Hay que pedir: ${[...agot, ...bajos].map(x => esc(x.v.nombre) + ' (' + x.stock + ')').join(', ')}</div>`;
+  ordenarLineas([...new Set(items.map(x => x.v.linea))]).forEach(l => {
+    html += `<div class="line-title" style="--c:${colorLinea(l)}">${esc(nombreLinea(l))}</div>` + items.filter(x => x.v.linea === l).map(fila).join('');
+  });
+  const ult = [...S.movs].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 15);
+  html += `<div class="card" style="margin-top:16px"><h3>Movimientos recientes</h3><p class="sub">Entradas, salidas y conteos (las ventas se descuentan solas)</p>
+    ${ult.length ? ult.map(mv => movHtml(mv, porId)).join('') : '<div class="empty" style="padding:10px">Sin movimientos.</div>'}</div>`;
+  $('#invBody').innerHTML = html;
+}
+function movHtml(mv, porId){
+  const v = porId[mv.varianteId], f = new Date(mv.fecha);
+  const signo = mv.tipo === 'entrada' ? '+' : mv.tipo === 'merma' ? '−' : '=';
+  return `<div class="mov"><div class="d">${esc(v ? v.nombre : 'Producto eliminado')}<small>${TIPOS_MOV[mv.tipo] || mv.tipo} · ${f.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })} ${hora(mv.fecha)}${mv.nota ? ' · ' + esc(mv.nota) : ''}</small></div>
+    <div class="q" style="color:${mv.tipo === 'entrada' ? 'var(--libre)' : mv.tipo === 'merma' ? 'var(--danger)' : 'var(--ink)'}">${signo}${mv.cantidad}</div>
+    <button class="del-x" data-movdel="${mv.id}" aria-label="Borrar movimiento">✕</button></div>`;
+}
+$('#invTop').addEventListener('click', e => { if (e.target.closest('[data-iv]')) configurarInv(); });
+$('#invBody').addEventListener('click', e => {
+  if (e.target.closest('[data-iv]')) return configurarInv();
+  const d = e.target.closest('[data-movdel]'); if (d) return borrarMov(d.dataset.movdel);
+  const r = e.target.closest('[data-inv]'); if (r) itemInv(r.dataset.inv);
+});
+async function borrarMov(id){
+  const mv = S.movs.find(x => x.id === id); if (!mv) return;
+  const g = mv.gastoId && S.gastos.find(x => x.id === mv.gastoId && !x.cierreId);
+  if (!await confirmar('¿Borrar este movimiento de inventario?' + (g ? ` También se borra el gasto de ${fmt(g.monto)} que se registró con él.` : ''))) return;
+  S.movs = S.movs.filter(x => x.id !== id);
+  if (g) S.gastos = S.gastos.filter(x => x.id !== g.id);
+  closeSheet(); render();
+  if (await guardar(Promise.all([DB.deleteMov(id), ...(g ? [DB.deleteGasto(g.id)] : [])]))) toast('Movimiento borrado');
+}
+function itemInv(id, tipo = 'entrada'){
+  const v = variantesInventario().find(x => x.id === id), cfg = S.inventario.find(x => x.id === id);
+  if (!v || !cfg) return;
+  const n = stockDe(id);
+  let medio = 'Transferencia';
+  const movs = S.movs.filter(x => x.varianteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 6);
+  openSheet(`
+    <h3>${esc(v.nombre)}</h3>
+    <p class="sub">${esc(v.sub)}</p>
+    <div class="big-total" style="color:${n <= 0 ? 'var(--danger)' : n <= cfg.minimo ? 'var(--ocup)' : 'var(--ink)'}">${n.toLocaleString('es-CO')} <small style="font-size:15px;color:var(--muted)">${v.unidad} disponibles</small></div>
+    <div class="seg big three" style="margin-top:10px">${Object.entries(TIPOS_MOV).map(([k, t]) => `<button data-tipo="${k}" class="${k === tipo ? 'on' : ''}" style="font-size:13px">${t}</button>`).join('')}</div>
+    <p class="sub" style="margin:0">${tipo === 'entrada' ? 'Llegó mercancía: se suma a lo que hay.' : tipo === 'merma' ? 'Se dañó, se regaló o se usó sin venderse: se resta.' : 'Contaste lo que hay de verdad: queda ese número.'}</p>
+    <label class="f">${tipo === 'conteo' ? 'Cantidad contada' : 'Cantidad'}</label>
+    <input class="in monto-in" id="ivCant" type="number" inputmode="decimal" min="0" step="1" placeholder="0">
+    ${tipo === 'entrada' ? `<label class="f">Valor pagado (opcional, se registra como gasto)</label>
+      <input class="in" id="ivValor" type="number" inputmode="numeric" min="0" step="1000" placeholder="0">
+      <div class="chips wrap" id="ivMedios" style="margin-top:8px">${MEDIOS_GASTO.map(x => `<button class="chip ${x === medio ? 'on' : ''}" data-md="${x}">${esc(nombreMedio(x))}</button>`).join('')}</div>` : ''}
+    <label class="f">Nota (opcional)</label>
+    <input class="in" id="ivNota" placeholder="${tipo === 'entrada' ? 'Ej: pedido Bavaria' : tipo === 'merma' ? 'Ej: se rompió una botella' : 'Ej: conteo del lunes'}" maxlength="60">
+    <button class="btn block" id="ivGuardar" style="margin-top:14px">Guardar ${TIPOS_MOV[tipo].toLowerCase()}</button>
+    <label class="f" style="margin-top:18px">Avisar cuando queden (mínimo)</label>
+    <div style="display:flex;gap:8px"><input class="in" id="ivMin" type="number" inputmode="numeric" min="0" value="${cfg.minimo}"><button class="btn ghost" id="ivMinOk">Guardar</button></div>
+    ${movs.length ? `<label class="f">Últimos movimientos</label>${movs.map(mv => movHtml(mv, { [id]: v })).join('')}` : ''}
+    <button class="btn danger block" id="ivQuitar" style="margin-top:16px">Dejar de controlar este producto</button>`);
+  $('#sheet').onclick = async e => {
+    const t = e.target.closest('[data-tipo]'); if (t) return itemInv(id, t.dataset.tipo);
+    const md = e.target.closest('[data-md]');
+    if (md){ medio = md.dataset.md; document.querySelectorAll('#ivMedios .chip').forEach(x => x.classList.toggle('on', x === md)); return; }
+    const d = e.target.closest('[data-movdel]'); if (d) return borrarMov(d.dataset.movdel);
+    if (e.target.id === 'ivMinOk'){
+      const mn = Math.max(0, Number($('#ivMin').value) || 0); cfg.minimo = mn;
+      render(); if (await guardar(DB.upsertInv(cfg))) toast('Mínimo guardado'); return itemInv(id, tipo);
+    }
+    if (e.target.id === 'ivQuitar'){
+      if (!await confirmar(`¿Dejar de controlar ${v.nombre}? Se conserva su historial por si lo vuelves a activar.`, 'Dejar de controlar')) return;
+      S.inventario = S.inventario.filter(x => x.id !== id);
+      closeSheet(); render();
+      if (await guardar(DB.deleteInv(id))) toast('Ya no se controla ' + v.nombre);
+      return;
+    }
+    if (e.target.id !== 'ivGuardar') return;
+    const cant = Number($('#ivCant').value);
+    if (!($('#ivCant').value !== '' && cant >= 0) || (tipo !== 'conteo' && !(cant > 0))) return toast('Escribe la cantidad');
+    const mov = { id: uid(), varianteId: id, tipo, cantidad: cant, fecha: new Date().toISOString(), nota: $('#ivNota').value.trim(), gastoId: null };
+    const tareas = [];
+    const valor = tipo === 'entrada' ? Math.round(Number($('#ivValor').value) || 0) : 0;
+    if (valor > 0){
+      const g = { id: uid(), fecha: keyDia(new Date()), creado: new Date().toISOString(), categoria: 'Insumos y mercancía',
+        descripcion: 'Compra ' + v.nombre + ' x' + cant, monto: valor, medio };
+      S.gastos.push(g); mov.gastoId = g.id; tareas.push(DB.upsertGasto(g));
+    }
+    S.movs.push(mov); tareas.push(DB.addMov(mov));
+    closeSheet(); render();
+    if (await guardar(Promise.all(tareas))) toast(TIPOS_MOV[tipo] + ' guardada · quedan ' + stockDe(id));
+  };
+}
+function configurarInv(){
+  if (necesitaV4()) return toast('Falta actualizar la base de datos (ver aviso)');
+  const vars = variantesInventario();
+  if (!vars.length) return toast('Primero agrega productos con precio');
+  const grupos = ordenarLineas([...new Set(vars.map(v => v.linea))]);
+  openSheet(`
+    <h3>Configurar inventario</h3>
+    <p class="sub">Marca lo que quieres controlar. En "Hay" escribe cuánto tienes ahora (déjalo vacío si no quieres cambiarlo). En las categorías por tamaño se cuentan los vasos.</p>
+    <div class="cfg-row cfg-h"><span></span><span>Producto</span><span style="text-align:center">Hay</span><span style="text-align:center">Mínimo</span></div>
+    ${grupos.map(l => `<div class="section-t" style="margin:14px 0 2px">${esc(nombreLinea(l))}</div>` + vars.filter(v => v.linea === l).map(v => {
+      const cfg = S.inventario.find(x => x.id === v.id);
+      return `<div class="cfg-row" data-cfg="${v.id}">
+        <input type="checkbox" ${cfg ? 'checked' : ''} aria-label="Controlar ${esc(v.nombre)}">
+        <div class="nm">${esc(v.nombre)}${cfg ? `<small>Ahora: ${stockDe(v.id)}</small>` : ''}</div>
+        <input class="in" data-hay type="number" inputmode="numeric" min="0" placeholder="${cfg ? stockDe(v.id) : '0'}">
+        <input class="in" data-min type="number" inputmode="numeric" min="0" value="${cfg ? cfg.minimo : 5}">
+      </div>`; }).join('')).join('')}
+    <div class="row2"><button class="btn ghost" id="cfCancel">Cancelar</button><button class="btn" id="cfSave">Guardar</button></div>`);
+  $('#sheet').onclick = async e => {
+    if (e.target.id === 'cfCancel') return closeSheet();
+    if (e.target.id !== 'cfSave') return;
+    const tareas = [], ahora = new Date().toISOString();
+    let cambios = 0;
+    document.querySelectorAll('#sheet [data-cfg]').forEach(r => {
+      const id = r.dataset.cfg, v = vars.find(x => x.id === id), cfg = S.inventario.find(x => x.id === id);
+      const on = r.querySelector('input[type=checkbox]').checked, hay = r.querySelector('[data-hay]').value.trim();
+      const minimo = Math.max(0, Number(r.querySelector('[data-min]').value) || 0);
+      if (!on){ if (cfg){ S.inventario = S.inventario.filter(x => x.id !== id); tareas.push(DB.deleteInv(id)); cambios++; } return; }
+      if (!cfg || cfg.minimo !== minimo){
+        const nuevo = { id, productoId: v.productoId || null, minimo, activo: true };
+        S.inventario = [...S.inventario.filter(x => x.id !== id), nuevo]; tareas.push(DB.upsertInv(nuevo)); cambios++;
+      }
+      if (hay !== '' && Number(hay) >= 0 && (!cfg || Number(hay) !== stockDe(id))){
+        const mov = { id: uid(), varianteId: id, tipo: 'conteo', cantidad: Number(hay), fecha: ahora, nota: 'Configuración', gastoId: null };
+        S.movs.push(mov); tareas.push(DB.addMov(mov)); cambios++;
+      }
+    });
+    closeSheet(); render();
+    if (!cambios) return toast('Sin cambios');
+    if (await guardar(Promise.all(tareas))) toast('Inventario guardado');
+  };
 }
 
 /* ===================================================================
@@ -1228,7 +1962,7 @@ function renderHist(){
     html += `<div class="day-h"><div>${esc(titulo.charAt(0).toUpperCase() + titulo.slice(1))}<small>${estado}</small></div><span>${vs.length} ventas · ${fmt(vs.reduce((a, v) => a + v.total, 0))}</span></div>`;
     html += vs.map(v => `<div class="sale">
       <div class="t">${hora(v.fecha)}</div>
-      <div class="d">${v.items.map(textoItem).join(', ')}<small>${esc(v.metodo)}</small></div>
+      <div class="d">${v.items.map(textoItem).join(', ')}<small>${esc(v.metodo)}${v.mesa ? ' · ' + esc(v.mesa) : ''}</small></div>
       <div class="m">${fmt(v.total)}</div>
       ${v.cierreId ? `<button class="lock" data-lock="1" aria-label="Venta en un cierre">${ICON_LOCK}</button>`
                    : `<button class="del-x" data-del="${v.id}" aria-label="Eliminar venta">✕</button>`}
@@ -1255,11 +1989,11 @@ function descargar(nombre, contenido, tipo){
 // CSV: una fila por producto vendido. Listo para Excel, Power BI o Python (pandas)
 $('#btnCsv').addEventListener('click', () => {
   if (!S.ventas.length) return toast('No hay ventas para exportar');
-  const filas = [['venta_id','fecha','hora','dia_semana','categoria','producto','presentacion','tamano_oz','cantidad','precio_unitario','subtotal','metodo_pago','cierre_id']];
+  const filas = [['venta_id','fecha','hora','dia_semana','categoria','producto','presentacion','tamano_oz','cantidad','precio_unitario','subtotal','metodo_pago','mesa','cierre_id']];
   [...S.ventas].sort((a, b) => a.fecha.localeCompare(b.fecha)).forEach(v => {
     const f = new Date(v.fecha);
     v.items.forEach(it => filas.push([v.id, keyDia(f), String(f.getHours()).padStart(2,'0') + ':' + String(f.getMinutes()).padStart(2,'0'),
-      DIAS[f.getDay()], nombreLinea(it.linea), it.nombre, varTxt(it), it.oz ?? '', it.cantidad, it.precio, it.precio * it.cantidad, v.metodo, v.cierreId || '']));
+      DIAS[f.getDay()], nombreLinea(it.linea), it.nombre, varTxt(it), it.oz ?? '', it.cantidad, it.precio, it.precio * it.cantidad, v.metodo, v.mesa || '', v.cierreId || '']));
   });
   descargarCsv('frio-intenso-ventas-' + keyDia(new Date()) + '.csv', filas);
 });
@@ -1271,7 +2005,8 @@ function descargarRespaldo(){
   const ahora = new Date();
   const hhmm = String(ahora.getHours()).padStart(2, '0') + String(ahora.getMinutes()).padStart(2, '0');
   descargar('frio-intenso-respaldo-' + keyDia(ahora) + '-' + hhmm + '.json',
-    JSON.stringify({ app: 'frio-intenso', version: 4, creado: ahora.toISOString(), lineas: S.lineas, productos: S.productos, tamanos: S.tamanos, ventas: S.ventas, cierres: S.cierres, gastos: S.gastos }), 'application/json');
+    JSON.stringify({ app: 'frio-intenso', version: 5, creado: ahora.toISOString(), lineas: S.lineas, productos: S.productos, tamanos: S.tamanos, ventas: S.ventas, cierres: S.cierres, gastos: S.gastos,
+      mesas: S.mesas, inventario: S.inventario, movs: S.movs, caja: S.caja }), 'application/json');
 }
 $('#btnBackup').addEventListener('click', descargarRespaldo);
 $('#btnRestore').addEventListener('click', () => $('#fileRestore').click());
@@ -1287,6 +2022,10 @@ $('#fileRestore').addEventListener('change', async e => {
     S.ventas = migrarVentas(data.ventas);
     S.cierres = Array.isArray(data.cierres) ? data.cierres : [];
     S.gastos = Array.isArray(data.gastos) ? data.gastos : [];
+    S.mesas = Array.isArray(data.mesas) ? data.mesas : S.mesas;
+    S.inventario = Array.isArray(data.inventario) ? data.inventario : [];
+    S.movs = Array.isArray(data.movs) ? data.movs : [];
+    S.caja = data.caja || null;
     Cola.escribir([]);
     if (!await guardar(DB.reemplazarTodo())) return;
     render(); toast('Respaldo restaurado');
@@ -1570,10 +2309,10 @@ function editarLinea(id){
 }
 
 /* ===================================================================
-   CIERRE DE CAJA
-   Cada venta queda "abierta" hasta que se cierra la caja de ese día.
-   El cierre guarda los totales, la hora exacta y el cuadre de efectivo,
-   y bloquea esas ventas para que el cierre no cambie después.
+   CUADRE Y CIERRE DE CAJA
+   La caja se abre con un monto inicial. Todas las ventas quedan en esa caja
+   hasta cerrarla (aunque pase la medianoche). El cierre guarda los totales,
+   el cuadre de efectivo y bloquea esas ventas para que no cambien después.
    =================================================================== */
 const chartsC = {};
 const fechaDeDia = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
@@ -1600,126 +2339,135 @@ function resumenVentas(vs){
 }
 // Gastos pagados con efectivo de la caja en un día, que todavía no están en ningún cierre
 const gastosCajaDe = dia => S.gastos.filter(g => !g.cierreId && g.medio === 'Efectivo' && g.fecha === dia);
-function crearCierre(dia, vs, r, form, cerradoEn, gastos = []){
+// Gastos en efectivo desde el día en que se abrió la caja actual
+const gastosCaja = () => { if (!S.caja) return []; const desde = keyDia(new Date(S.caja.abiertaEn)), hasta = keyDia(new Date());
+  return S.gastos.filter(g => !g.cierreId && g.medio === 'Efectivo' && g.fecha >= desde && g.fecha <= hasta); };
+function crearCierre(caja, vs, r, form, cerradoEn, gastos = []){
   const efectivoVentas = r.porMetodo.Efectivo || 0;
   const gastosEfectivo = gastos.reduce((a, g) => a + g.monto, 0);
-  const esperado = (form.base || 0) + efectivoVentas - gastosEfectivo;
+  const base = caja.base || 0;
+  const esperado = base + efectivoVentas - gastosEfectivo;
   const contado = form.contado === null || form.contado === '' || isNaN(form.contado) ? null : Number(form.contado);
-  const id = uid();
+  const id = caja.id;
   vs.forEach(v => { v.cierreId = id; });
   gastos.forEach(g => { g.cierreId = id; });
-  return { id, dia, gastosEfectivo, cerradoEn: cerradoEn || new Date().toISOString(), primera: r.primera, ultima: r.ultima,
+  return { id, dia: keyDia(new Date(caja.abiertaEn)), estado: 'cerrada', abiertaEn: caja.abiertaEn, abiertaPor: caja.abiertaPor || '',
+    gastosEfectivo, cerradoEn: cerradoEn || new Date().toISOString(), primera: r.primera, ultima: r.ultima,
     pedidos: r.pedidos, unidades: r.unidades, total: r.total, porMetodo: r.porMetodo, porLinea: r.porLinea, unidadesLinea: r.unidadesLinea,
-    base: form.base || 0, efectivoVentas, efectivoEsperado: esperado, efectivoContado: contado,
+    base, efectivoVentas, efectivoEsperado: esperado, efectivoContado: contado,
     diferencia: contado === null ? null : contado - esperado, responsable: form.responsable || '', nota: form.nota || '' };
 }
-// Ventas sin cerrar, agrupadas por día. Se cierra primero el día más antiguo.
-function pendientesPorDia(){
-  const m = new Map();
-  S.ventas.filter(v => !v.cierreId).forEach(v => { const k = keyDia(new Date(v.fecha)); if (!m.has(k)) m.set(k, []); m.get(k).push(v); });
-  return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-}
-const ultimoCierre = () => [...S.cierres].sort((a, b) => b.cerradoEn.localeCompare(a.cerradoEn))[0];
+const ultimoCierre = () => [...S.cierres].sort((a, b) => (b.cerradoEn || '').localeCompare(a.cerradoEn || ''))[0];
+const fechaHora = iso => iso ? new Date(iso).toLocaleString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '—';
 
 function renderCierre(){
-  const pend = pendientesPorDia(), hoyK = keyDia(new Date());
   let html = '';
-  if (!pend.length){
-    const ch = S.cierres.filter(c => c.dia === hoyK);
-    html = `<div class="card"><div class="empty" style="padding:18px 8px">${ch.length
-      ? `✓ La caja de hoy se cerró a las <b>${hora(ch[ch.length - 1].cerradoEn)}</b>.<br>Si se vende algo más, se abre una caja nueva.`
-      : 'No hay ventas pendientes por cerrar.<br>La caja se abre sola con la primera venta.'}</div></div>`;
-  } else {
-    const [dia, vs] = pend[0];
-    const r = resumenVentas(vs);
+  if (!S.caja){
     const u = ultimoCierre();
-    const esHoy = dia === hoyK;
-    const pasados = pend.filter(([d]) => d < hoyK).length;
-    if (!esHoy) html += `<div class="warn">La caja del <b>${fmtDia(dia)}</b> quedó abierta. Ciérrala para cuadrar ese día.
-      ${pasados > 1 ? `<br>Hay ${pasados} días anteriores sin cerrar.<br><button class="btn sm ghost" id="btnCerrarPasados">Cerrar los ${pasados} días sin contar efectivo</button>` : ''}</div>`;
-    html += `
-      <div class="card">
-        <h3>${esHoy ? 'Caja de hoy' : 'Caja del ' + fmtDia(dia)} · abierta</h3>
-        <p class="sub">Primera venta ${hora(r.primera)} · última ${hora(r.ultima)}</p>
-        <div class="big-total">${fmt(r.total)}</div>
-        <div class="mini"><div>Pedidos<b>${r.pedidos}</b></div><div>Unidades<b>${r.unidades}</b></div><div>Ticket prom.<b>${fmtK(Math.round(r.total / r.pedidos))}</b></div></div>
-      </div>
-      <div class="card">
-        <h3>Por método de pago</h3>
-        ${METODOS.concat(Object.keys(r.porMetodo).filter(m => !METODOS.includes(m))).filter(m => r.porMetodo[m]).map(m => `<div class="kv"><span>${esc(m)}</span><span>${fmt(r.porMetodo[m])}</span></div>`).join('')}
-        <h3 style="margin-top:14px">Por categoría</h3>
-        ${ordenarLineas(Object.keys(r.porLinea)).map(l => `<div class="kv"><span>${esc(nombreLinea(l))} · ${r.unidadesLinea[l]} u</span><span>${fmt(r.porLinea[l])}</span></div>`).join('')}
-      </div>
-      <div class="card" id="cuadre">
-        <h3>Cuadre de efectivo</h3>
-        <label class="f">Base (efectivo con el que se abrió)</label>
-        <input class="in" id="cBase" type="number" inputmode="numeric" min="0" step="1000" value="${u ? u.base : ''}" placeholder="0">
-        <div class="kv" style="margin-top:8px"><span>Ventas en efectivo</span><span>${fmt(r.porMetodo.Efectivo || 0)}</span></div>
-        ${(() => { const gs = gastosCajaDe(dia), tot = gs.reduce((a, g) => a + g.monto, 0);
-          return `<div class="kv"><span>Gastos pagados con la caja${gs.length ? `<small style="display:block;color:var(--muted);font-weight:600;font-size:12px">${gs.map(g => esc(g.descripcion || g.categoria) + ' ' + fmt(g.monto)).join(' · ')}</small>` : ''}</span><span>${tot ? '− ' + fmt(tot) : fmt(0)}</span></div>
-          <button class="btn sm ghost" id="btnGastoCaja" style="margin:8px 0 2px">+ Gasto pagado con la caja</button>`; })()}
-        <div class="kv tot"><span>Efectivo esperado</span><span id="cEsperado"></span></div>
-        <label class="f">Efectivo contado</label>
-        <input class="in" id="cContado" type="number" inputmode="numeric" min="0" step="500" placeholder="Cuenta billetes y monedas">
-        <div class="diff-box"><span>Diferencia</span><span id="cDiff"></span></div>
-        <label class="f">Quién cierra</label>
-        <input class="in" id="cResp" value="${esc(u ? u.responsable : '')}" placeholder="Nombre" maxlength="30">
-        <label class="f">Nota (opcional)</label>
-        <input class="in" id="cNota" placeholder="Ej: se pagó hielo con la caja" maxlength="120">
-        <label class="check"><input type="checkbox" id="cRespaldo" ${Almacen.get('fi_respaldo_auto', true) ? 'checked' : ''}> Descargar un respaldo al cerrar la caja</label>
-        <button class="btn block" style="margin-top:16px" id="btnCerrar">Cerrar caja</button>
-      </div>`;
-    S._cierreActual = { dia, vs, r, gastos: gastosCajaDe(dia) };
+    html = `<div class="card"><div class="caja-h">${ICON_LOCK}Caja cerrada</div>
+      <div class="abrir-box">
+        <p class="sub" style="font-size:14px">No hay caja abierta. Debes abrir la caja para poder vender y operar las mesas.</p>
+        <label class="f">Monto inicial en caja (efectivo)</label>
+        <input class="in" id="aBase" type="number" inputmode="numeric" min="0" step="1000" value="${u ? u.base : ''}" placeholder="0">
+        <label class="f">Quién abre</label>
+        <input class="in" id="aNombre" value="${esc(nombreGuardado())}" placeholder="Tu nombre" maxlength="30" style="font-size:16px;text-align:center">
+        <button class="btn ok block" id="btnAbrirCaja" style="margin-top:16px;padding:15px;font-size:17px">${ICON_UNLOCK} Abrir caja</button>
+      </div></div>`;
+    $('#cierreActual').innerHTML = html;
+    renderCierreStats(); renderCierreLista();
+    return;
   }
+  const c = S.caja, vs = S.ventas.filter(v => !v.cierreId), r = resumenVentas(vs), gs = gastosCaja();
+  const gtot = gs.reduce((a, g) => a + g.monto, 0);
+  const mesasAb = S.mesas.filter(ocupada);
+  const metodos = [...METODOS, ...Object.keys(r.porMetodo).filter(m => !METODOS.includes(m))];
+  html = `
+    <div class="card">
+      <div class="caja-h">${ICON_UNLOCK.replace('style="', 'style="width:22px;height:22px;')}Caja abierta<span class="estado diff ok">ABIERTA</span></div>
+      ${c.virtual ? '<div class="warn">Esta caja se abrió sola con las ventas que quedaron sin cerrar. Ciérrala para cuadrarla.</div>' : ''}
+      <div class="det">
+        <div><small>Abierta por</small><b>${esc(c.abiertaPor || '—')}</b></div>
+        <div><small>Fecha apertura</small><b>${fechaHora(c.abiertaEn)}</b></div>
+        <div><small>Monto inicial</small><b>${fmt(c.base)}</b></div>
+      </div>
+      <h3 style="margin-bottom:8px">Ventas por tipo de pago</h3>
+      <div class="pagos">
+        ${metodos.map(m => `<div class="kv"><span>${esc(m)}</span><span>${fmt(r.porMetodo[m] || 0)}</span></div>`).join('')}
+        <div class="kv tot" style="border-top:2px solid var(--ink)"><span>Total ventas</span><span>${fmt(r.total)}</span></div>
+      </div>
+      <div class="mini"><div>Pedidos<b>${r.pedidos}</b></div><div>Unidades<b>${r.unidades}</b></div><div>Ticket prom.<b>${r.pedidos ? fmtK(Math.round(r.total / r.pedidos)) : '$0'}</b></div></div>
+      ${r.pedidos ? `<h3 style="margin-top:14px">Por categoría</h3>
+        ${ordenarLineas(Object.keys(r.porLinea)).map(l => `<div class="kv"><span>${esc(nombreLinea(l))} · ${r.unidadesLinea[l]} u</span><span>${fmt(r.porLinea[l])}</span></div>`).join('')}` : ''}
+    </div>
+    ${mesasAb.length ? `<div class="warn">Hay ${mesasAb.length} ${mesasAb.length === 1 ? 'mesa' : 'mesas'} con cuenta abierta (${fmt(mesasAb.reduce((a, m) => a + totalMesa(m), 0))}): ${mesasAb.map(m => esc(m.nombre)).join(', ')}.
+      Cóbralas antes de cerrar; si cierras igual, quedan para la próxima caja.</div>` : ''}
+    <div class="card" id="cuadre">
+      <h3>Cuadre de efectivo</h3>
+      <div class="kv" style="margin-top:8px"><span>Monto inicial</span><span>${fmt(c.base)}</span></div>
+      <div class="kv"><span>Ventas en efectivo</span><span>${fmt(r.porMetodo.Efectivo || 0)}</span></div>
+      <div class="kv"><span>Gastos pagados con la caja${gs.length ? `<small style="display:block;color:var(--muted);font-weight:600;font-size:12px">${gs.map(g => esc(g.descripcion || g.categoria) + ' ' + fmt(g.monto)).join(' · ')}</small>` : ''}</span><span>${gtot ? '− ' + fmt(gtot) : fmt(0)}</span></div>
+      <button class="btn sm ghost" id="btnGastoCaja" style="margin:8px 0 2px">+ Gasto pagado con la caja</button>
+      <div class="esperado"><small>Efectivo esperado en caja</small><b id="cEsperado"></b></div>
+      <label class="f">Monto real en caja (efectivo contado)</label>
+      <input class="in" id="cContado" type="number" inputmode="numeric" min="0" step="500" placeholder="Cuenta billetes y monedas">
+      <div class="diff-box"><span>Diferencia</span><span id="cDiff"></span></div>
+      <label class="f">Quién cierra</label>
+      <input class="in" id="cResp" value="${esc(nombreGuardado())}" placeholder="Nombre" maxlength="30">
+      <label class="f">Nota (opcional)</label>
+      <input class="in" id="cNota" placeholder="Ej: se pagó hielo con la caja" maxlength="120">
+      <label class="check"><input type="checkbox" id="cRespaldo" ${Almacen.get('fi_respaldo_auto', true) ? 'checked' : ''}> Descargar un respaldo al cerrar la caja</label>
+      <button class="btn danger-fill block" style="margin-top:16px;padding:15px;font-size:17px" id="btnCerrar">Cerrar caja</button>
+    </div>`;
+  S._cierreActual = { vs, r, gastos: gs };
   $('#cierreActual').innerHTML = html;
-  if (pend.length) actualizarCuadre();
+  actualizarCuadre();
   renderCierreStats();
   renderCierreLista();
 }
 function leerCuadre(){
-  const { r } = S._cierreActual;
-  const base = Math.max(0, Math.round(Number($('#cBase').value) || 0));
+  const { r, gastos } = S._cierreActual;
+  const base = S.caja ? S.caja.base || 0 : 0;
   const c = $('#cContado').value.trim();
   const contado = c === '' ? null : Math.round(Number(c));
-  const gastosEf = (S._cierreActual.gastos || []).reduce((a, g) => a + g.monto, 0);
+  const gastosEf = (gastos || []).reduce((a, g) => a + g.monto, 0);
   return { base, contado, esperado: base + (r.porMetodo.Efectivo || 0) - gastosEf, responsable: $('#cResp').value.trim(), nota: $('#cNota').value.trim() };
 }
 function actualizarCuadre(){
+  if (!$('#cContado')) return;
   const q = leerCuadre();
   $('#cEsperado').textContent = fmt(q.esperado);
   $('#cDiff').innerHTML = diffBadge(q.contado === null ? null : q.contado - q.esperado);
 }
-$('#cierreActual').addEventListener('input', e => { if (e.target.id === 'cBase' || e.target.id === 'cContado') actualizarCuadre(); });
+$('#cierreActual').addEventListener('input', e => { if (e.target.id === 'cContado') actualizarCuadre(); });
 $('#cierreActual').addEventListener('change', e => { if (e.target.id === 'cRespaldo') Almacen.set('fi_respaldo_auto', e.target.checked); });
 $('#cierreActual').addEventListener('click', async e => {
-  if (e.target.id === 'btnCerrar'){
-    if (NUBE && !navigator.onLine) return toast('Necesitas internet para cerrar la caja');
-    const { dia, vs, r, gastos } = S._cierreActual, q = leerCuadre();
-    const msg = `¿Cerrar la caja ${dia === keyDia(new Date()) ? 'de hoy' : 'del ' + fmtDia(dia)} con ${fmt(r.total)} en ventas?`
-      + (q.contado === null ? ' No has contado el efectivo.' : '') + ' Las ventas quedarán bloqueadas.';
-    if (!await confirmar(msg, 'Cerrar caja', false)) return;
-    const c = crearCierre(dia, vs, r, q, null, gastos);
-    S.cierres.push(c);
-    Cola.sincronizar();
-    if (!await guardar(DB.addCierre(c, vs.map(v => v.id), gastos.map(g => g.id)))) return;
-    const respaldar = Almacen.get('fi_respaldo_auto', true);
-    render(); window.scrollTo(0, 0);
-    if (respaldar){ try { descargarRespaldo(); } catch(err){ console.error(err); } }
-    toast('Caja cerrada a las ' + hora(c.cerradoEn) + (respaldar ? ' · respaldo descargado' : ''));
+  if (e.target.closest('#btnAbrirCaja')) return abrirCaja($('#aBase').value, $('#aNombre').value);
+  if (e.target.id === 'btnGastoCaja') return editarGasto(null, { medio: 'Efectivo', fecha: keyDia(new Date()) });
+  if (e.target.id !== 'btnCerrar') return;
+  if (NUBE && !navigator.onLine) return toast('Necesitas internet para cerrar la caja');
+  const form = leerCuadre(), antes = S._cierreActual.r.total;
+  // Trae las ventas registradas desde otros celulares antes de cerrar
+  if (NUBE){ try { await cargarDatos(); } catch(err){ console.error(err); } }
+  if (!S.caja){ render(); return toast('La caja ya la cerró otra persona'); }
+  const vs = S.ventas.filter(v => !v.cierreId), r = resumenVentas(vs), gastos = gastosCaja();
+  if (r.total !== antes){
+    render();
+    $('#cContado').value = form.contado ?? ''; $('#cResp').value = form.responsable; $('#cNota').value = form.nota; actualizarCuadre();
+    return toast('Llegaron ventas nuevas. Revisa el cuadre y vuelve a cerrar');
   }
-  if (e.target.id === 'btnGastoCaja') return editarGasto(null, { medio: 'Efectivo', fecha: S._cierreActual.dia });
-  if (e.target.id === 'btnCerrarPasados'){
-    const hoyK = keyDia(new Date());
-    const pasados = pendientesPorDia().filter(([d]) => d < hoyK);
-    if (!await confirmar(`¿Cerrar ${pasados.length} días anteriores sin contar el efectivo?`, 'Cerrar días', false)) return;
-    const base = ultimoCierre()?.base || 0;
-    const nuevos = pasados.map(([d, vs]) => { const gs = gastosCajaDe(d);
-      return [crearCierre(d, vs, resumenVentas(vs), { base, contado: null, responsable: '', nota: 'Cerrado sin conteo' }, null, gs), vs.map(v => v.id), gs.map(g => g.id)]; });
-    nuevos.forEach(([c]) => S.cierres.push(c));
-    Cola.sincronizar();
-    for (const [c, ids, gids] of nuevos) if (!await guardar(DB.addCierre(c, ids, gids))) return;
-    render(); toast(pasados.length + ' días cerrados');
-  }
+  const msg = `¿Cerrar la caja con ${fmt(r.total)} en ventas?` + (form.contado === null ? ' No has contado el efectivo.' : '')
+    + ' Después no se puede vender hasta abrir una caja nueva.';
+  if (!await confirmar(msg, 'Cerrar caja')) return;
+  if (form.responsable) Almacen.set('fi_nombre', form.responsable);
+  const c = crearCierre(S.caja, vs, r, form, null, gastos);
+  S.cierres.push(c);
+  S.caja = null;
+  Cola.sincronizar();
+  if (!await guardar(DB.addCierre(c, vs.map(v => v.id), gastos.map(g => g.id)))) return;
+  const respaldar = Almacen.get('fi_respaldo_auto', true);
+  render(); window.scrollTo(0, 0);
+  if (respaldar){ try { descargarRespaldo(); } catch(err){ console.error(err); } }
+  toast('Caja cerrada a las ' + hora(c.cerradoEn) + (respaldar ? ' · respaldo descargado' : ''));
 });
 
 /* ---------- Gráficas de cierres ---------- */
@@ -1812,65 +2560,82 @@ $('#cierreStats').addEventListener('click', e => {
   const b = e.target.closest('[data-rc]'); if (b){ S.rangoCierre = b.dataset.rc; renderCierreStats(); }
 });
 
-/* ---------- Lista y detalle de cierres ---------- */
+/* ---------- Historial de cajas y detalle ---------- */
+function cierresFiltrados(){
+  const { desde, hasta } = S.filtroCaja;
+  return [...S.cierres].filter(c => (!desde || c.dia >= desde) && (!hasta || c.dia <= hasta))
+    .sort((a, b) => (b.cerradoEn || '').localeCompare(a.cerradoEn || ''));
+}
 function renderCierreLista(){
-  const cs = [...S.cierres].sort((a, b) => b.cerradoEn.localeCompare(a.cerradoEn));
+  const cs = cierresFiltrados();
   const n = S.verCierres || 10;
   $('#cierreLista').innerHTML = `
-    <div class="sec-h"><b>Cierres anteriores</b>${cs.length ? '<button class="btn sm ghost" id="btnCsvCierres">CSV cierres</button>' : ''}</div>
+    <div class="sec-h"><b>Historial de cajas <span class="count-pill">${cs.length} ${cs.length === 1 ? 'caja' : 'cajas'}</span></b>${cs.length ? '<button class="btn sm ghost" id="btnCsvCierres">CSV</button>' : ''}</div>
+    <div class="filtros">
+      <div><label class="f">Desde</label><input class="in" type="date" id="fcDesde" value="${S.filtroCaja.desde}"></div>
+      <div><label class="f">Hasta</label><input class="in" type="date" id="fcHasta" value="${S.filtroCaja.hasta}"></div>
+      <button class="btn sm" id="btnFiltrarCajas" style="padding:11px 14px">${S.filtroCaja.desde || S.filtroCaja.hasta ? 'Filtrar' : 'Filtrar'}</button>
+    </div>
+    ${S.filtroCaja.desde || S.filtroCaja.hasta ? '<button class="btn sm ghost" id="btnLimpiarCajas" style="margin-bottom:10px">Quitar filtro</button>' : ''}
     ${cs.length ? cs.slice(0, n).map(c => `
       <button class="cierre-row" data-cierre="${c.id}">
-        <div class="d">${fmtDia(c.dia)}<small>Cerrada a las ${hora(c.cerradoEn)} · ${c.pedidos} pedidos${c.responsable ? ' · ' + esc(c.responsable) : ''}</small></div>
+        <div class="d">${fechaHora(c.abiertaEn)} → ${c.cerradoEn && c.abiertaEn && keyDia(new Date(c.cerradoEn)) === keyDia(new Date(c.abiertaEn)) ? fechaHora(c.cerradoEn).split(', ').pop() : fechaHora(c.cerradoEn)}
+          <small>${c.abiertaPor ? esc(c.abiertaPor) + ' · ' : ''}Inicial ${fmt(c.base)} · Esperado ${fmt(c.efectivoEsperado)} · Real ${c.efectivoContado === null || c.efectivoContado === undefined ? '—' : fmt(c.efectivoContado)}</small></div>
         <div class="m">${fmt(c.total)}<br>${diffBadge(c.diferencia)}</div>
       </button>`).join('') + (cs.length > n ? `<button class="btn ghost block" id="btnMasCierres">Ver más (${cs.length - n} restantes)</button>` : '')
-    : '<div class="empty">Todavía no se ha cerrado ninguna caja.</div>'}`;
+    : `<div class="empty">${S.cierres.length ? 'No hay cajas en esas fechas.' : 'Todavía no se ha cerrado ninguna caja.'}</div>`}`;
 }
 $('#cierreLista').addEventListener('click', e => {
   if (e.target.id === 'btnCsvCierres') return exportarCierres();
   if (e.target.id === 'btnMasCierres'){ S.verCierres = (S.verCierres || 10) + 20; return renderCierreLista(); }
+  if (e.target.id === 'btnFiltrarCajas'){ S.filtroCaja = { desde: $('#fcDesde').value, hasta: $('#fcHasta').value }; S.verCierres = 10; return renderCierreLista(); }
+  if (e.target.id === 'btnLimpiarCajas'){ S.filtroCaja = { desde: '', hasta: '' }; return renderCierreLista(); }
   const b = e.target.closest('[data-cierre]'); if (b) verCierre(b.dataset.cierre);
 });
 function verCierre(id){
   const c = S.cierres.find(x => x.id === id); if (!c) return;
   openSheet(`
-    <h3>${fmtDia(c.dia)}</h3>
-    <p class="sub">Cerrada a las ${hora(c.cerradoEn)}${c.primera ? ' · ventas de ' + hora(c.primera) + ' a ' + hora(c.ultima) : ''}${c.responsable ? ' · ' + esc(c.responsable) : ''}</p>
+    <h3>Caja del ${fmtDia(c.dia)}</h3>
+    <p class="sub">Abierta ${fechaHora(c.abiertaEn)}${c.abiertaPor ? ' por ' + esc(c.abiertaPor) : ''} · cerrada ${fechaHora(c.cerradoEn)}${c.responsable ? ' por ' + esc(c.responsable) : ''}</p>
     <div class="big-total">${fmt(c.total)}</div>
     <div class="mini"><div>Pedidos<b>${c.pedidos}</b></div><div>Unidades<b>${c.unidades}</b></div><div>Ticket prom.<b>${fmtK(Math.round(c.total / Math.max(c.pedidos, 1)))}</b></div></div>
     ${Object.entries(c.porMetodo).map(([m, v]) => `<div class="kv"><span>${esc(m)}</span><span>${fmt(v)}</span></div>`).join('')}
     ${ordenarLineas(Object.keys(c.porLinea || {})).map(l => `<div class="kv"><span>${esc(nombreLinea(l))}${c.unidadesLinea && c.unidadesLinea[l] != null ? ' · ' + c.unidadesLinea[l] + ' u' : ''}</span><span>${fmt(c.porLinea[l] || 0)}</span></div>`).join('')}
     <label class="f">Cuadre de efectivo</label>
-    <div class="kv"><span>Base</span><span>${fmt(c.base)}</span></div>
+    <div class="kv"><span>Monto inicial</span><span>${fmt(c.base)}</span></div>
     <div class="kv"><span>Ventas en efectivo</span><span>${fmt(c.efectivoVentas)}</span></div>
     ${c.gastosEfectivo ? `<div class="kv"><span>Gastos pagados con la caja</span><span>− ${fmt(c.gastosEfectivo)}</span></div>` : ''}
     <div class="kv tot"><span>Efectivo esperado</span><span>${fmt(c.efectivoEsperado)}</span></div>
-    <div class="kv"><span>Efectivo contado</span><span>${c.efectivoContado === null ? '—' : fmt(c.efectivoContado)}</span></div>
+    <div class="kv"><span>Monto real</span><span>${c.efectivoContado === null || c.efectivoContado === undefined ? '—' : fmt(c.efectivoContado)}</span></div>
     <div class="diff-box"><span>Diferencia</span>${diffBadge(c.diferencia)}</div>
     ${c.nota ? `<p class="sub" style="margin-top:12px">Nota: ${esc(c.nota)}</p>` : ''}
     <div class="row2"><button class="btn danger" id="btnReabrir">Reabrir caja</button><button class="btn ghost" id="btnCerrarDet">Listo</button></div>`);
   $('#sheet').onclick = async e => {
     if (e.target.id === 'btnCerrarDet') return closeSheet();
     if (e.target.id !== 'btnReabrir') return;
+    if (S.caja) return toast('Primero cierra la caja que está abierta');
     if (!await confirmar(`¿Reabrir la caja del ${fmtDia(c.dia)}? Se borra este cierre y sus ventas vuelven a quedar abiertas para corregirlas.`, 'Reabrir')) return;
     S.ventas.forEach(v => { if (v.cierreId === id) delete v.cierreId; });
     S.gastos.forEach(g => { if (g.cierreId === id) delete g.cierreId; });
     S.cierres = S.cierres.filter(x => x.id !== id);
+    S.caja = nuevaCaja({ id, abiertaEn: c.abiertaEn || c.primera || c.cerradoEn, abiertaPor: c.abiertaPor, base: c.base });
     Cola.sincronizar();
     closeSheet();
-    if (!await guardar(DB.deleteCierre(id))) return;
+    if (!await guardar(DB.reabrirCierre(id))) return;
     render(); toast('Caja reabierta');
   };
 }
 function exportarCierres(){
-  const filas = [['cierre_id','dia','hora_cierre','primera_venta','ultima_venta','pedidos','unidades','total',
-    ...METODOS.map(m => m.toLowerCase()), ...lineaIds().map(l => 'cat_' + nombreLinea(l).toLowerCase().replace(/\s+/g, '_')), 'base','gastos_efectivo','efectivo_esperado','efectivo_contado','diferencia','responsable','nota']];
-  [...S.cierres].sort((a, b) => a.cerradoEn.localeCompare(b.cerradoEn)).forEach(c => {
-    const hhmm = iso => { if (!iso) return ''; const f = new Date(iso); return String(f.getHours()).padStart(2,'0') + ':' + String(f.getMinutes()).padStart(2,'0'); };
-    filas.push([c.id, c.dia, hhmm(c.cerradoEn), hhmm(c.primera), hhmm(c.ultima), c.pedidos, c.unidades, c.total,
+  const hhmm = iso => { if (!iso) return ''; const f = new Date(iso); return String(f.getHours()).padStart(2,'0') + ':' + String(f.getMinutes()).padStart(2,'0'); };
+  const filas = [['cierre_id','fecha_apertura','hora_apertura','abierta_por','fecha_cierre','hora_cierre','primera_venta','ultima_venta','pedidos','unidades','total',
+    ...METODOS.map(m => m.toLowerCase()), ...lineaIds().map(l => 'cat_' + nombreLinea(l).toLowerCase().replace(/\s+/g, '_')), 'monto_inicial','gastos_efectivo','efectivo_esperado','efectivo_real','diferencia','cerrada_por','nota']];
+  cierresFiltrados().reverse().forEach(c => {
+    filas.push([c.id, c.abiertaEn ? keyDia(new Date(c.abiertaEn)) : c.dia, hhmm(c.abiertaEn), c.abiertaPor || '', c.cerradoEn ? keyDia(new Date(c.cerradoEn)) : '', hhmm(c.cerradoEn),
+      hhmm(c.primera), hhmm(c.ultima), c.pedidos, c.unidades, c.total,
       ...METODOS.map(m => c.porMetodo[m] || 0), ...lineaIds().map(l => c.porLinea?.[l] || 0),
       c.base, c.gastosEfectivo || 0, c.efectivoEsperado, c.efectivoContado ?? '', c.diferencia ?? '', c.responsable, c.nota]);
   });
-  descargarCsv('frio-intenso-cierres-' + keyDia(new Date()) + '.csv', filas);
+  descargarCsv('frio-intenso-cajas-' + keyDia(new Date()) + '.csv', filas);
 }
 
 /* ===================================================================
@@ -2118,9 +2883,9 @@ function editarGasto(id, pre = {}){
     const datos = { monto, fecha, categoria: cat, descripcion: $('#gDesc').value.trim(), medio };
     let obj = g;
     if (id) Object.assign(g, datos); else { obj = { id: uid(), creado: new Date().toISOString(), ...datos }; S.gastos.push(obj); }
-    const yaCerrado = medio === 'Efectivo' && S.cierres.some(x => x.dia === fecha) && !pendientesPorDia().some(([d]) => d === fecha);
+    const yaCerrado = medio === 'Efectivo' && !(S.caja && fecha >= keyDia(new Date(S.caja.abiertaEn)));
     closeSheet(); render();
-    if (await guardar(DB.upsertGasto(obj))) toast(yaCerrado ? 'Gasto guardado. La caja de ese día ya estaba cerrada: no se descuenta de ningún cierre' : 'Gasto guardado · ' + fmt(monto));
+    if (await guardar(DB.upsertGasto(obj))) toast(yaCerrado ? 'Gasto guardado. No hay caja abierta en esa fecha: no se descuenta de ningún cierre' : 'Gasto guardado · ' + fmt(monto));
   };
 }
 async function borrarGasto(id){
@@ -2188,18 +2953,23 @@ async function cargarDemo(){
     const vs = ventas.filter(v => keyDia(new Date(v.fecha)) === d);
     const ultima = new Date(Math.max(...vs.map(v => +new Date(v.fecha))));
     const cerrado = new Date(ultima); cerrado.setHours(21, 30 + Math.floor(Math.random() * 40), 0, 0);
+    const apertura = fechaDeDia(d); apertura.setHours(9, 30 + Math.floor(Math.random() * 30), 0, 0);
     const r = resumenVentas(vs), base = 50000;
     const ajuste = Math.random() < .7 ? 0 : (Math.random() < .5 ? -1 : 1) * 1000 * Math.ceil(Math.random() * 6);
     const gs = gastosCajaDe(d), gtot = gs.reduce((a, g) => a + g.monto, 0);
-    S.cierres.push(crearCierre(d, vs, r, { base, contado: base + (r.porMetodo.Efectivo || 0) - gtot + ajuste, responsable: 'Ejemplo', nota: '' }, cerrado.toISOString(), gs));
+    const caja = nuevaCaja({ abiertaEn: apertura.toISOString(), abiertaPor: 'Ejemplo', base });
+    S.cierres.push(crearCierre(caja, vs, r, { contado: base + (r.porMetodo.Efectivo || 0) - gtot + ajuste, responsable: 'Ejemplo', nota: '' }, cerrado.toISOString(), gs));
   });
+  // La caja de hoy queda abierta
+  const ap = new Date(); ap.setHours(9, 30, 0, 0);
+  S.caja = ventas.some(v => !v.cierreId) ? nuevaCaja({ abiertaEn: ap.toISOString(), abiertaPor: 'Ejemplo', base: 50000 }) : null;
   render();
   if (await guardar(DB.reemplazarVentasYCierres())) toast('Datos de ejemplo cargados');
 }
 async function borrarTodo(){
   if (!S.ventas.length) return toast('No hay ventas');
   if (!await confirmar(`¿Borrar TODAS las ventas, cierres de caja y gastos${NUBE ? ' de la nube' : ''}? Esto no se puede deshacer. Haz un respaldo antes.`, 'Borrar todo')) return;
-  S.ventas = []; S.cierres = []; S.gastos = []; Cola.escribir([]); render();
+  S.ventas = []; S.cierres = []; S.gastos = []; S.caja = null; Cola.escribir([]); render();
   if (await guardar(DB.reemplazarVentasYCierres())) toast('Ventas y cierres borrados');
 }
 
@@ -2237,13 +3007,24 @@ async function cargarDatos(){
     S.productos.push(...extras);
   }
   S.ventas = migrarVentas(d.ventas || []);
-  S.cierres = d.cierres || [];
+  const todas = d.cierres || [];
+  const abiertas = todas.filter(c => c.estado === 'abierta').sort((a, b) => (b.abiertaEn || '').localeCompare(a.abiertaEn || ''));
+  S.cierres = todas.filter(c => c.estado !== 'abierta');
+  S.caja = abiertas[0] || ((!NUBE || !S.v4 || desdeCache) ? (d.caja || null) : null);
   S.gastos = d.gastos || [];
+  S.mesas = d.mesas || [];
+  S.inventario = d.inventario || [];
+  S.movs = d.movs || [];
   ultimaCarga = Date.now();
+  // Ventas hechas sin internet que todavía no llegan a la nube
+  if (NUBE) Cola.leer().forEach(v => { if (!S.ventas.some(x => x.id === v.id)) S.ventas.push(v); });
+  // Ventas que quedaron sin cerrar de antes de que existiera la apertura de caja: se agrupan en una caja abierta
+  if (!S.caja){
+    const pend = S.ventas.filter(v => !v.cierreId).map(v => v.fecha).sort();
+    if (pend.length) S.caja = nuevaCaja({ abiertaEn: pend[0], abiertaPor: '', base: ultimoCierre()?.base || 0, virtual: true });
+  }
   if (!NUBE) return DBLocal._guardar();
   if (!desdeCache) guardarCache(true);
-  // Ventas hechas sin internet que todavía no llegan a la nube
-  Cola.leer().forEach(v => { if (!S.ventas.some(x => x.id === v.id)) S.ventas.push(v); });
   if (desdeCache) toast('Sin internet: mostrando los últimos datos guardados');
   else {
     // Primera vez en la nube (o primera vez con categorías): guarda lo de ejemplo
@@ -2263,7 +3044,8 @@ function guardarCache(ya){
   clearTimeout(tCache);
   const hacer = () => {
     const desde = new Date(Date.now() - 180 * 864e5).toISOString();
-    Almacen.set('fi_cache', { lineas: S.faltaActualizar ? null : S.lineas, productos: S.productos, tamanos: S.tamanos, cierres: S.cierres, gastos: S.gastos, ventas: S.ventas.filter(v => v.fecha >= desde) });
+    Almacen.set('fi_cache', { lineas: S.faltaActualizar ? null : S.lineas, productos: S.productos, tamanos: S.tamanos, cierres: S.cierres, gastos: S.gastos, ventas: S.ventas.filter(v => v.fecha >= desde),
+      mesas: S.mesas, inventario: S.inventario, movs: S.movs, caja: S.caja && !S.caja.virtual ? S.caja : null });
   };
   ya ? hacer() : (tCache = setTimeout(hacer, 1500));
 }
@@ -2295,11 +3077,27 @@ $('#loginForm').addEventListener('submit', async e => {
   await entrar();
 });
 // Al volver a abrir la app, trae las ventas registradas desde otros celulares
+const escribiendo = () => { const a = document.activeElement; return a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName); };
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && NUBE && usuario && Date.now() - ultimaCarga > 60000 && !$('#sheetBg').classList.contains('show')) recargar();
+  if (document.visibilityState === 'visible' && NUBE && usuario && Date.now() - ultimaCarga > 60000 && !$('#sheetBg').classList.contains('show') && !escribiendo()) recargar();
 });
+// Cada 15 segundos revisa las mesas y la caja, para ver lo que hacen otros celulares
+setInterval(async () => {
+  if (!NUBE || !usuario || !S.v4 || sinSesion || document.visibilityState !== 'visible' || S.editPlano
+    || $('#sheetBg').classList.contains('show') || $('#dlgBg').classList.contains('show') || escribiendo()) return;
+  try {
+    const [mesas, caja] = await Promise.all([DB.cargarMesas(), DB.estadoCaja()]);
+    const cambioCaja = (caja ? caja.id : null) !== (S.caja && !S.caja.virtual ? S.caja.id : null) && !(S.caja && S.caja.virtual && !caja);
+    if (cambioCaja) return recargar();
+    if (JSON.stringify(mesas) !== JSON.stringify(S.mesas)){
+      S.mesas = mesas; _stock = null;
+      if (vista === 'mesas' || vista === 'inv') render();
+    }
+  } catch(e){ console.warn('Actualizar mesas:', e); }
+}, 15000);
 
 (async function iniciar(){
+  document.body.classList.add('vista-mesas');
   if (!NUBE){ await cargarDatos(); render(); return; }
   if (!sb) return mostrarLogin('No se pudo cargar la conexión con la nube. Revisa el internet y vuelve a abrir la app.');
   let sesion = null, error = null;
